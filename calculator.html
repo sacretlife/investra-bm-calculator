@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Investra — Financial Projections Calculator</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root{--navy:#0A1628;--navy2:#1a2f52;--gold:#C9A84C;--gold-light:#F0D080;--white:#fff;--gray-bg:#F5F6FA;--gray:#6B7280;--border:#E5E7EB;--green:#10B981;--blue:#3B82F6;--red:#EF4444;--purple:#8B5CF6;}
+:root{--navy:#0A1628;--navy2:#1a2f52;--gold:#C9A84C;--gold-light:#F0D080;--white:#fff;--gray-bg:#F5F6FA;--gray:#6B7280;--border:#E5E7EB;--green:#10B981;--blue:#3B82F6;--red:#EF4444;--purple:#8B5CF6;--orange:#F59E0B;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);color:var(--navy);}
 .app{display:flex;min-height:100vh;}
@@ -26,45 +26,48 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);color
 .nav-item:hover{background:rgba(255,255,255,0.08);color:var(--white);}
 .nav-item.active{background:var(--gold);color:var(--navy);font-weight:700;}
 .nav-icon{font-size:16px;width:20px;text-align:center;}
-.topbar{background:var(--white);border-bottom:2px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar{background:var(--white);border-bottom:2px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;flex-wrap:wrap;gap:10px;}
 .topbar-title{font-size:20px;font-weight:800;}
 .topbar-title span{color:var(--gold);}
-.topbar-right{display:flex;gap:10px;align-items:center;}
+.topbar-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 .btn{padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all 0.15s;}
 .btn-gold{background:var(--gold);color:var(--navy);}
 .btn-outline{background:transparent;border:2px solid var(--border);color:var(--navy);}
 .btn-outline:hover{border-color:var(--gold);color:var(--gold);}
-.content{padding:32px;}
-
-/* INPUT PANEL */
+.content{padding:28px;}
 .input-panel{background:var(--white);border-radius:16px;padding:28px;margin-bottom:24px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
 .panel-title{font-size:16px;font-weight:800;margin-bottom:4px;}
 .panel-sub{font-size:13px;color:var(--gray);margin-bottom:20px;}
 .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;}
-@media(max-width:900px){.grid-3,.grid-4{grid-template-columns:1fr 1fr;}}
-@media(max-width:600px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+.grid-5{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:16px;}
+@media(max-width:1100px){.grid-5{grid-template-columns:1fr 1fr 1fr;}}
+@media(max-width:900px){.grid-3,.grid-4,.grid-5{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.grid-2,.grid-3,.grid-4,.grid-5{grid-template-columns:1fr;}}
 .field{display:flex;flex-direction:column;gap:5px;}
 .field label{font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;}
-.field input,.field select{padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;background:var(--white);transition:border-color 0.15s;}
+.field input,.field select{padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;background:var(--white);transition:border-color 0.15s;color:var(--navy);}
 .field input:focus,.field select:focus{outline:none;border-color:var(--gold);}
 .field .hint{font-size:11px;color:var(--gray);}
 .range-wrap{display:flex;align-items:center;gap:12px;}
 .range-wrap input[type=range]{flex:1;accent-color:var(--gold);}
 .range-val{font-weight:700;font-size:14px;min-width:52px;text-align:right;color:var(--gold);}
 .divider{height:1px;background:var(--border);margin:20px 0;}
+.section-label{font-size:12px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid var(--gold);}
 
 /* KPI CARDS */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
-@media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:1100px){.kpi-grid{grid-template-columns:1fr 1fr;}}
 .kpi-card{background:var(--white);border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-top:4px solid transparent;}
 .kpi-card.gold{border-top-color:var(--gold);}
 .kpi-card.green{border-top-color:var(--green);}
 .kpi-card.blue{border-top-color:var(--blue);}
 .kpi-card.purple{border-top-color:var(--purple);}
+.kpi-card.orange{border-top-color:var(--orange);}
+.kpi-card.red{border-top-color:var(--red);}
 .kpi-label{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
-.kpi-value{font-size:28px;font-weight:900;line-height:1;}
+.kpi-value{font-size:26px;font-weight:900;line-height:1;}
 .kpi-sub{font-size:12px;color:var(--gray);margin-top:6px;}
 .kpi-trend{font-size:12px;font-weight:700;margin-top:4px;}
 .kpi-trend.up{color:var(--green);}
@@ -77,6 +80,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);color
 .chart-title{font-size:15px;font-weight:800;margin-bottom:4px;}
 .chart-sub{font-size:12px;color:var(--gray);margin-bottom:16px;}
 .chart-wrap{height:280px;position:relative;}
+.chart-card.wide{grid-column:1/-1;}
 
 /* BREAKDOWN TABLE */
 .breakdown-card{background:var(--white);border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:24px;}
@@ -88,19 +92,54 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);color
 .amount-cell{font-weight:700;color:var(--navy);}
 .pct-cell{color:var(--gold);font-weight:700;}
 .hq-row td{color:var(--gray);}
+.positive{color:var(--green);font-weight:700;}
+.negative{color:var(--red);font-weight:700;}
 
 /* VIEW TOGGLE */
-.view-toggle{display:flex;gap:8px;background:#F3F4F6;border-radius:10px;padding:4px;}
-.view-btn{padding:7px 16px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--gray);transition:all 0.15s;}
+.view-toggle{display:flex;gap:4px;background:#F3F4F6;border-radius:10px;padding:4px;}
+.view-btn{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--gray);transition:all 0.15s;}
 .view-btn.active{background:var(--white);color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
 
 /* PROJECTION HORIZON */
-.horizon-toggle{display:flex;gap:8px;}
+.horizon-toggle{display:flex;gap:6px;}
 .horizon-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid var(--border);background:transparent;color:var(--gray);transition:all 0.15s;}
 .horizon-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.05);}
 
 /* ROLE NOTICE */
 .role-notice{background:#FFFBEB;border:1px solid var(--gold);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;display:flex;align-items:center;gap:10px;}
+
+/* CASCADE VISUAL */
+.cascade-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px;}
+@media(max-width:900px){.cascade-wrap{grid-template-columns:1fr;}}
+.cascade-card{border-radius:14px;padding:20px;position:relative;overflow:hidden;}
+.cascade-card.hq{background:linear-gradient(135deg,#0A1628,#1a2f52);color:white;}
+.cascade-card.mf{background:linear-gradient(135deg,#78350f,#92400e);color:white;}
+.cascade-card.f{background:linear-gradient(135deg,#1e3a5f,#1d4ed8);color:white;}
+.cascade-card-title{font-size:11px;font-weight:700;opacity:0.7;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.cascade-card-name{font-size:18px;font-weight:900;margin-bottom:16px;}
+.cascade-card-name span{color:var(--gold);}
+.cascade-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.1);}
+.cascade-row:last-child{border-bottom:none;padding-top:10px;margin-top:4px;}
+.cascade-row-label{font-size:12px;opacity:0.8;}
+.cascade-row-value{font-size:13px;font-weight:800;}
+.cascade-row-value.gold{color:var(--gold);}
+.cascade-total{font-size:22px;font-weight:900;color:var(--gold);}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:2px solid var(--border);}
+.tab{padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--gray);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.15s;}
+.tab.active{color:var(--navy);border-bottom-color:var(--gold);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+/* SCENARIO */
+.scenario-bar{background:var(--white);border-radius:12px;padding:16px 24px;margin-bottom:20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+.scenario-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid var(--border);background:transparent;color:var(--gray);transition:all 0.15s;}
+.scenario-btn.active{border-color:var(--gold);background:var(--gold);color:var(--navy);}
+.scenario-label{font-size:12px;color:var(--gray);font-weight:600;}
+
+/* PRINT */
+@media print{.sidebar,.topbar,.btn,.scenario-bar,.tabs{display:none!important;}.main{width:100%;}.content{padding:10px;}}
 </style>
 </head>
 <body>
@@ -123,6 +162,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);color
   <div class="nav-item" id="admin_link" onclick="window.location='admin.html'" style="display:none"><span class="nav-icon">⚙️</span>Admin Settings</div>
   <div class="nav-item" onclick="window.location='model-preview.html'"><span class="nav-icon">👁️</span>Model Preview</div>
   <div class="nav-item" onclick="window.location='index.html'"><span class="nav-icon">🚪</span>Logout</div>
+  <div class="nav-section" style="margin-top:auto;">Info</div>
+  <div style="padding:12px 16px;color:rgba(255,255,255,0.4);font-size:11px;">Model B — Tiered Royalty<br>All values in EUR (€)</div>
 </div>
 
 <div class="main">
@@ -130,9 +171,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);color
     <div class="topbar-title">Financial <span>Projections</span></div>
     <div class="topbar-right">
       <div class="view-toggle">
-        <button class="view-btn active" onclick="setView('mf',this)">MF View</button>
-        <button class="view-btn" onclick="setView('f',this)" id="f_view_btn">F View</button>
-        <button class="view-btn" onclick="setView('full',this)" id="full_view_btn">Full Cascade</button>
+        <button class="view-btn active" id="btn_mf" onclick="setView('mf',this)">MF View</button>
+        <button class="view-btn" id="btn_f" onclick="setView('f',this)">F View</button>
+        <button class="view-btn" id="btn_full" onclick="setView('full',this)">Full Cascade</button>
       </div>
       <div class="horizon-toggle">
         <button class="horizon-btn active" onclick="setHorizon(12,this)">12M</button>
@@ -148,430 +189,772 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);color
       🏆 <span id="role_notice_text">Viewing as: <strong>Master Franchise</strong></span>
     </div>
 
-    <!-- INPUT PANEL -->
-    <div class="input-panel">
-      <div class="panel-title">⚙️ Input Parameters</div>
-      <div class="panel-sub">Adjust any parameter and all projections update instantly.</div>
+    <!-- SCENARIO PRESETS -->
+    <div class="scenario-bar">
+      <span class="scenario-label">Quick Scenarios:</span>
+      <button class="scenario-btn active" onclick="loadScenario('conservative',this)">🐢 Conservative</button>
+      <button class="scenario-btn" onclick="loadScenario('realistic',this)">📈 Realistic</button>
+      <button class="scenario-btn" onclick="loadScenario('optimistic',this)">🚀 Optimistic</button>
+      <button class="scenario-btn" onclick="loadScenario('premium',this)">💎 Premium Market</button>
+    </div>
 
-      <div class="grid-4">
-        <div class="field">
-          <label>Country</label>
-          <select id="inp_country" onchange="recalc()">
-            <option value="si">🇸🇮 Slovenia</option>
-            <option value="hr">🇭🇷 Croatia</option>
-            <option value="rs">🇷🇸 Serbia</option>
-            <option value="ba">🇧🇦 BiH</option>
-            <option value="cy">🇨🇾 TRNC</option>
-            <option value="tr">🇹🇷 Turkey</option>
-            <option value="de">🇩🇪 Germany</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Avg. Property Value (€)</label>
-          <input type="number" id="inp_prop_val" value="250000" min="10000" step="5000" oninput="recalc()">
-        </div>
-        <div class="field">
-          <label>Avg. Commission %</label>
-          <div class="range-wrap">
-            <input type="range" id="inp_commission" min="0.5" max="10" step="0.1" value="2" oninput="document.getElementById('inp_comm_val').textContent=this.value+'%';recalc()">
-            <span class="range-val" id="inp_comm_val">2%</span>
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('inputs',this)">⚙️ Inputs</button>
+      <button class="tab" onclick="switchTab('cascade',this)">🔀 Revenue Cascade</button>
+      <button class="tab" onclick="switchTab('charts',this)">📈 Charts</button>
+      <button class="tab" onclick="switchTab('breakdown',this)">📋 Breakdown Table</button>
+      <button class="tab" onclick="switchTab('roi',this)">💰 ROI Analysis</button>
+    </div>
+
+    <!-- TAB: INPUTS -->
+    <div class="tab-content active" id="tab_inputs">
+      <div class="input-panel">
+        <div class="panel-title">🌍 Market & Transaction Parameters</div>
+        <div class="panel-sub">All projections update instantly when you change any value.</div>
+        <div class="grid-4">
+          <div class="field">
+            <label>Country</label>
+            <select id="inp_country" onchange="recalc()">
+              <option value="si">🇸🇮 Slovenia</option>
+              <option value="hr">🇭🇷 Croatia</option>
+              <option value="rs">🇷🇸 Serbia</option>
+              <option value="ba">🇧🇦 BiH</option>
+              <option value="cy">🇨🇾 TRNC / Cyprus</option>
+              <option value="tr">🇹🇷 Turkey</option>
+              <option value="de">🇩🇪 Germany</option>
+              <option value="ae">🇦🇪 Dubai / UAE</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Avg. Property Value (€)</label>
+            <input type="number" id="inp_prop_val" value="250000" min="10000" step="5000" oninput="recalc()">
+            <div class="hint">Default: €250,000</div>
+          </div>
+          <div class="field">
+            <label>Avg. Commission %</label>
+            <div class="range-wrap">
+              <input type="range" id="inp_commission" min="0.5" max="10" step="0.1" value="2" oninput="document.getElementById('inp_comm_val').textContent=parseFloat(this.value).toFixed(1)+'%';recalc()">
+              <span class="range-val" id="inp_comm_val">2.0%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Annual Growth Rate %</label>
+            <div class="range-wrap">
+              <input type="range" id="inp_growth" min="0" max="150" step="5" value="20" oninput="document.getElementById('inp_growth_val').textContent=this.value+'%';recalc()">
+              <span class="range-val" id="inp_growth_val">20%</span>
+            </div>
           </div>
         </div>
-        <div class="field">
-          <label>Growth Rate / Year %</label>
-          <div class="range-wrap">
-            <input type="range" id="inp_growth" min="0" max="100" step="5" value="20" oninput="document.getElementById('inp_growth_val').textContent=this.value+'%';recalc()">
-            <span class="range-val" id="inp_growth_val">20%</span>
+
+        <div class="divider"></div>
+        <div class="section-label">👥 Active Users on Platform</div>
+        <div class="grid-5">
+          <div class="field">
+            <label>Active Agents</label>
+            <input type="number" id="inp_agents" value="50" min="0" oninput="recalc()">
+            <div class="hint">Avg: Agent P2 (€99/mo)</div>
+          </div>
+          <div class="field">
+            <label>Active Agencies</label>
+            <input type="number" id="inp_agencies" value="10" min="0" oninput="recalc()">
+            <div class="hint">Avg: Agency P1 (€199/mo)</div>
+          </div>
+          <div class="field">
+            <label>Active Developers</label>
+            <input type="number" id="inp_devs" value="5" min="0" oninput="recalc()">
+            <div class="hint">Avg: Developer P1 (€299/mo)</div>
+          </div>
+          <div class="field">
+            <label>VIP Clients</label>
+            <input type="number" id="inp_clients" value="100" min="0" oninput="recalc()">
+            <div class="hint">VIP: €50/mo</div>
+          </div>
+          <div class="field">
+            <label>Affiliates (Pro)</label>
+            <input type="number" id="inp_affiliates" value="20" min="0" oninput="recalc()">
+            <div class="hint">Affiliate P2: €29/mo</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">💳 Transactions & Additional Revenue</div>
+        <div class="grid-4">
+          <div class="field">
+            <label>Transactions / Month</label>
+            <input type="number" id="inp_transactions" value="8" min="0" oninput="recalc()">
+          </div>
+          <div class="field">
+            <label>Ad Credits Revenue / Mo (€)</label>
+            <input type="number" id="inp_ads" value="2000" min="0" oninput="recalc()">
+            <div class="hint">Top listings, featured ads</div>
+          </div>
+          <div class="field">
+            <label>Events & PR Revenue / Mo (€)</label>
+            <input type="number" id="inp_events" value="500" min="0" oninput="recalc()">
+            <div class="hint">Event tickets, PR content</div>
+          </div>
+          <div class="field">
+            <label>Standard Franchises Sold</label>
+            <input type="number" id="inp_f_sold" value="3" min="0" oninput="recalc()">
+            <div class="hint">Avg. Tier C setup €4,900</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">⚙️ Revenue Share Parameters (Model B)</div>
+        <div class="grid-4">
+          <div class="field">
+            <label>MF Royalty (GMV) %</label>
+            <div class="range-wrap">
+              <input type="range" id="inp_mf_royalty" min="0.5" max="5" step="0.1" value="1.5" oninput="document.getElementById('inp_mf_royalty_val').textContent=parseFloat(this.value).toFixed(1)+'%';recalc()">
+              <span class="range-val" id="inp_mf_royalty_val">1.5%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>F Royalty (GMV) %</label>
+            <div class="range-wrap">
+              <input type="range" id="inp_f_royalty" min="0.5" max="5" step="0.1" value="3" oninput="document.getElementById('inp_f_royalty_val').textContent=parseFloat(this.value).toFixed(1)+'%';recalc()">
+              <span class="range-val" id="inp_f_royalty_val">3.0%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>MF Licence Share %</label>
+            <div class="range-wrap">
+              <input type="range" id="inp_mf_lic" min="5" max="30" step="1" value="15" oninput="document.getElementById('inp_mf_lic_val').textContent=this.value+'%';recalc()">
+              <span class="range-val" id="inp_mf_lic_val">15%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>MF Ads/Events Share %</label>
+            <div class="range-wrap">
+              <input type="range" id="inp_mf_ads" min="5" max="30" step="1" value="15" oninput="document.getElementById('inp_mf_ads_val').textContent=this.value+'%';recalc()">
+              <span class="range-val" id="inp_mf_ads_val">15%</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="divider"></div>
-
-      <div class="grid-4">
-        <div class="field">
-          <label>Active Agents</label>
-          <input type="number" id="inp_agents" value="50" min="0" oninput="recalc()">
-          <div class="hint">Avg. package: Agent P2 (€99/mo)</div>
+      <!-- KPI CARDS -->
+      <div class="kpi-grid" id="kpi_section">
+        <div class="kpi-card gold">
+          <div class="kpi-label" id="kpi1_label">MF Monthly Revenue</div>
+          <div class="kpi-value" id="kpi_monthly">€0</div>
+          <div class="kpi-sub">All revenue streams combined</div>
+          <div class="kpi-trend up" id="kpi_monthly_trend">↑ Growing</div>
         </div>
-        <div class="field">
-          <label>Active Agencies</label>
-          <input type="number" id="inp_agencies" value="10" min="0" oninput="recalc()">
-          <div class="hint">Avg. package: Agency P1 (€199/mo)</div>
+        <div class="kpi-card green">
+          <div class="kpi-label" id="kpi2_label">MF Annual Revenue</div>
+          <div class="kpi-value" id="kpi_annual">€0</div>
+          <div class="kpi-sub">12-month projection</div>
+          <div class="kpi-trend up" id="kpi_annual_trend">↑ +20% YoY</div>
         </div>
-        <div class="field">
-          <label>Active Developers</label>
-          <input type="number" id="inp_devs" value="5" min="0" oninput="recalc()">
-          <div class="hint">Avg. package: Developer P1 (€299/mo)</div>
+        <div class="kpi-card blue">
+          <div class="kpi-label">GMV (Monthly)</div>
+          <div class="kpi-value" id="kpi_gmv">€0</div>
+          <div class="kpi-sub">Gross Merchandise Value</div>
+          <div class="kpi-trend up">↑ Transaction volume</div>
         </div>
-        <div class="field">
-          <label>Active Clients (VIP)</label>
-          <input type="number" id="inp_clients" value="100" min="0" oninput="recalc()">
-          <div class="hint">VIP package: €50/mo</div>
+        <div class="kpi-card purple">
+          <div class="kpi-label">Break-Even Month</div>
+          <div class="kpi-value" id="kpi_breakeven">M6</div>
+          <div class="kpi-sub">Based on licence investment</div>
+          <div class="kpi-trend up" id="kpi_be_trend">✅ On track</div>
         </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="grid-4">
-        <div class="field">
-          <label>Transactions / Month</label>
-          <input type="number" id="inp_transactions" value="8" min="0" oninput="recalc()">
+        <div class="kpi-card orange">
+          <div class="kpi-label">SaaS Licence Revenue</div>
+          <div class="kpi-value" id="kpi_saas">€0</div>
+          <div class="kpi-sub">Monthly recurring (MRR)</div>
+          <div class="kpi-trend up">↑ Predictable income</div>
         </div>
-        <div class="field">
-          <label>Ad Credits Revenue / Mo (€)</label>
-          <input type="number" id="inp_ads" value="2000" min="0" oninput="recalc()">
+        <div class="kpi-card gold">
+          <div class="kpi-label">Royalty Revenue</div>
+          <div class="kpi-value" id="kpi_royalty">€0</div>
+          <div class="kpi-sub">From GMV transactions</div>
+          <div class="kpi-trend up">↑ Transaction-based</div>
         </div>
-        <div class="field">
-          <label>Events Revenue / Mo (€)</label>
-          <input type="number" id="inp_events" value="500" min="0" oninput="recalc()">
+        <div class="kpi-card green">
+          <div class="kpi-label">Ads + Events Revenue</div>
+          <div class="kpi-value" id="kpi_ads_rev">€0</div>
+          <div class="kpi-sub">Monthly share</div>
+          <div class="kpi-trend up">↑ Growing</div>
         </div>
-        <div class="field">
-          <label>Standard Franchises Sold</label>
-          <input type="number" id="inp_f_sold" value="3" min="0" oninput="recalc()">
-          <div class="hint">Avg. Tier C setup €4,900</div>
+        <div class="kpi-card blue">
+          <div class="kpi-label">Franchise Setup Revenue</div>
+          <div class="kpi-value" id="kpi_setup">€0</div>
+          <div class="kpi-sub">One-time + recurring</div>
+          <div class="kpi-trend up">↑ Expansion</div>
         </div>
       </div>
     </div>
 
-    <!-- KPI CARDS -->
-    <div class="kpi-grid">
-      <div class="kpi-card gold">
-        <div class="kpi-label">MF Monthly Revenue</div>
-        <div class="kpi-value" id="kpi_monthly">€0</div>
-        <div class="kpi-sub">All revenue streams combined</div>
-        <div class="kpi-trend up" id="kpi_monthly_trend">↑ Growing</div>
+    <!-- TAB: CASCADE -->
+    <div class="tab-content" id="tab_cascade">
+      <div class="cascade-wrap" id="cascade_cards">
+        <!-- Dynamically filled -->
       </div>
-      <div class="kpi-card green">
-        <div class="kpi-label">MF Annual Revenue</div>
-        <div class="kpi-value" id="kpi_annual">€0</div>
-        <div class="kpi-sub">12-month projection</div>
-        <div class="kpi-trend up" id="kpi_annual_trend">↑ +20% YoY</div>
-      </div>
-      <div class="kpi-card blue">
-        <div class="kpi-label">GMV (Monthly)</div>
-        <div class="kpi-value" id="kpi_gmv">€0</div>
-        <div class="kpi-sub">Gross Merchandise Value</div>
-        <div class="kpi-trend up">↑ Transaction volume</div>
-      </div>
-      <div class="kpi-card purple">
-        <div class="kpi-label">Break-Even Month</div>
-        <div class="kpi-value" id="kpi_breakeven">M6</div>
-        <div class="kpi-sub">Based on MF licence cost</div>
-        <div class="kpi-trend up">✅ On track</div>
+      <div class="breakdown-card">
+        <div class="panel-title" style="margin-bottom:16px;">🔀 Full Revenue Cascade — Who Gets What</div>
+        <table class="breakdown-table" id="cascade_table">
+          <thead><tr><th>Revenue Stream</th><th>Total Pool (€/mo)</th><th>HQ (2%)</th><th>MF Share</th><th>F Share</th><th>Referral</th></tr></thead>
+          <tbody id="cascade_tbody"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- CHARTS -->
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-title">📈 Revenue Growth Projection</div>
-        <div class="chart-sub">Monthly revenue over selected horizon (Model B — Tiered)</div>
-        <div class="chart-wrap"><canvas id="chart_growth"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">🥧 Revenue Stream Breakdown</div>
-        <div class="chart-sub">Monthly revenue by source</div>
-        <div class="chart-wrap"><canvas id="chart_breakdown"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">💰 Cumulative Revenue vs. Investment</div>
-        <div class="chart-sub">Break-even analysis over time</div>
-        <div class="chart-wrap"><canvas id="chart_breakeven"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">📊 Annual Revenue Comparison (3Y)</div>
-        <div class="chart-sub">Year 1 vs Year 2 vs Year 3</div>
-        <div class="chart-wrap"><canvas id="chart_annual"></canvas></div>
+    <!-- TAB: CHARTS -->
+    <div class="tab-content" id="tab_charts">
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">📈 Revenue Growth Projection</div>
+          <div class="chart-sub" id="chart_growth_sub">Monthly revenue over selected horizon</div>
+          <div class="chart-wrap"><canvas id="chart_growth"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">🥧 Revenue Stream Breakdown</div>
+          <div class="chart-sub">Monthly revenue by source</div>
+          <div class="chart-wrap"><canvas id="chart_breakdown"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">💰 Cumulative Revenue vs. Investment</div>
+          <div class="chart-sub">Break-even analysis over time</div>
+          <div class="chart-wrap"><canvas id="chart_breakeven"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">📊 Annual Revenue Comparison (3 Years)</div>
+          <div class="chart-sub">Year-over-year growth projection</div>
+          <div class="chart-wrap"><canvas id="chart_annual"></canvas></div>
+        </div>
+        <div class="chart-card wide">
+          <div class="chart-title">🏗️ Revenue Stream Stacked — Monthly</div>
+          <div class="chart-sub">Breakdown of each revenue stream over time</div>
+          <div class="chart-wrap" style="height:320px;"><canvas id="chart_stacked"></canvas></div>
+        </div>
       </div>
     </div>
 
-    <!-- BREAKDOWN TABLE -->
-    <div class="breakdown-card">
-      <div class="chart-title" style="margin-bottom:4px">🔍 Full Revenue Breakdown</div>
-      <div class="chart-sub" style="margin-bottom:16px">Monthly revenue by stream with cascade distribution</div>
-      <table class="breakdown-table">
-        <thead>
-          <tr>
-            <th>Revenue Stream</th>
-            <th>Gross (€)</th>
-            <th>HQ % / Amount</th>
-            <th id="mf_col_header">MF % / Amount</th>
-            <th id="f_col_header">F % / Amount</th>
-            <th>Your Share (€)</th>
-          </tr>
-        </thead>
-        <tbody id="breakdown_body"></tbody>
-      </table>
+    <!-- TAB: BREAKDOWN -->
+    <div class="tab-content" id="tab_breakdown">
+      <div class="breakdown-card">
+        <div class="panel-title" style="margin-bottom:16px;">📋 Detailed Revenue Breakdown</div>
+        <table class="breakdown-table" id="breakdown_table">
+          <thead><tr><th>Revenue Stream</th><th>Calculation Basis</th><th>Monthly (€)</th><th>Annual (€)</th><th>% of Total</th></tr></thead>
+          <tbody id="breakdown_tbody"></tbody>
+        </table>
+      </div>
     </div>
 
-  </div>
-</div>
-</div>
+    <!-- TAB: ROI -->
+    <div class="tab-content" id="tab_roi">
+      <div class="input-panel">
+        <div class="panel-title">💰 ROI & Investment Analysis</div>
+        <div class="panel-sub">Based on your MF licence investment and projected revenues.</div>
+        <div class="grid-3">
+          <div class="field">
+            <label>MF Licence Investment (€/year)</label>
+            <input type="number" id="inp_mf_invest" value="50000" min="1000" step="1000" oninput="recalc()">
+            <div class="hint">Annual licence fee paid to HQ</div>
+          </div>
+          <div class="field">
+            <label>Setup & Operational Costs (€/mo)</label>
+            <input type="number" id="inp_op_costs" value="3000" min="0" step="100" oninput="recalc()">
+            <div class="hint">Office, staff, marketing, etc.</div>
+          </div>
+          <div class="field">
+            <label>Initial Investment (€)</label>
+            <input type="number" id="inp_initial" value="75000" min="0" step="1000" oninput="recalc()">
+            <div class="hint">Total initial capital deployed</div>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card gold">
+          <div class="kpi-label">Net Monthly Profit</div>
+          <div class="kpi-value" id="roi_net_monthly">€0</div>
+          <div class="kpi-sub">Revenue minus all costs</div>
+          <div class="kpi-trend up" id="roi_net_trend">Calculating...</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">Net Annual Profit</div>
+          <div class="kpi-value" id="roi_net_annual">€0</div>
+          <div class="kpi-sub">Year 1 net profit</div>
+          <div class="kpi-trend up" id="roi_annual_trend">Calculating...</div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-label">ROI %</div>
+          <div class="kpi-value" id="roi_pct">0%</div>
+          <div class="kpi-sub">Return on total investment</div>
+          <div class="kpi-trend up" id="roi_pct_trend">Year 1</div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-label">Payback Period</div>
+          <div class="kpi-value" id="roi_payback">0 mo</div>
+          <div class="kpi-sub">Months to recover investment</div>
+          <div class="kpi-trend up" id="roi_payback_trend">Calculating...</div>
+        </div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card wide">
+          <div class="chart-title">💰 Net Profit Projection (Revenue vs. Costs)</div>
+          <div class="chart-sub">Monthly net profit over selected horizon</div>
+          <div class="chart-wrap" style="height:320px;"><canvas id="chart_roi"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+</div><!-- end main -->
+</div><!-- end app -->
 
 <script>
-// ---- SETTINGS (Model B defaults — synced with Admin) ----
-const S = {
-  gmv_tiers: [
-    {max:1e6,   hq:2,   mf:1,   f:0.5},
-    {max:5e6,   hq:2,   mf:1.5, f:1  },
-    {max:20e6,  hq:2,   mf:2,   f:1.5},
-    {max:Infinity,hq:2, mf:2.5, f:2  }
-  ],
-  lic_tiers: [
-    {max:50,  mf:15, f:8,  ref:5},
-    {max:100, mf:18, f:10, ref:5},
-    {max:Infinity, mf:20, f:12, ref:5}
-  ],
-  ads_mf: 15, ads_f: 8,
-  evt_mf: 12, evt_f: 6,
-  agent_avg: 99, agency_avg: 199, dev_avg: 299, client_vip: 50,
-  f_setup_avg: 4900, f_monthly_avg: 449,
-  mf_annual: 50000, mf_monthly: 2000,
+// =============================================
+// CONFIGURATION — Model B (Tiered Royalty)
+// =============================================
+const CONFIG = {
+  hq_royalty_pct: 2,
+  mf_royalty_pct: 1.5,
+  f_royalty_pct: 3,
+  mf_licence_share: 15,
+  f_licence_share: 10,
+  mf_ads_share: 15,
+  f_ads_share: 10,
+  mf_events_share: 15,
+  f_events_share: 10,
+  referral_pct: 5,
+  recruit_bonus: 15,
+  f_setup_avg: 4900,
+  f_saas_avg: 349,
+  // Packages (monthly)
+  agent_p2: 99,
+  agency_p1: 199,
+  dev_p1: 299,
+  client_vip: 50,
+  affiliate_p2: 29,
+  // Country multipliers for market size
+  country_mult: {si:1.0, hr:1.2, rs:1.4, ba:0.8, cy:0.9, tr:2.0, de:2.5, ae:2.2}
 };
 
 let currentView = 'mf';
 let currentHorizon = 12;
-let charts = {};
+const charts = {};
 
-function getGMVTier(gmv) {
-  return S.gmv_tiers.find(t => gmv <= t.max) || S.gmv_tiers[S.gmv_tiers.length-1];
-}
-function getLicTier(total_lic) {
-  return S.lic_tiers.find(t => total_lic <= t.max) || S.lic_tiers[S.lic_tiers.length-1];
+function fmt(n){ return '€' + Math.round(n).toLocaleString('de-DE'); }
+function fmtK(n){ return n >= 1000000 ? '€' + (n/1000000).toFixed(1) + 'M' : n >= 1000 ? '€' + Math.round(n/1000) + 'K' : '€' + Math.round(n); }
+
+// =============================================
+// MAIN CALCULATION ENGINE
+// =============================================
+function calcRevenue() {
+  const propVal = parseFloat(document.getElementById('inp_prop_val').value) || 250000;
+  const commPct = parseFloat(document.getElementById('inp_commission').value) || 2;
+  const growthPct = parseFloat(document.getElementById('inp_growth').value) || 20;
+  const agents = parseInt(document.getElementById('inp_agents').value) || 0;
+  const agencies = parseInt(document.getElementById('inp_agencies').value) || 0;
+  const devs = parseInt(document.getElementById('inp_devs').value) || 0;
+  const clients = parseInt(document.getElementById('inp_clients').value) || 0;
+  const affiliates = parseInt(document.getElementById('inp_affiliates').value) || 0;
+  const transactions = parseInt(document.getElementById('inp_transactions').value) || 0;
+  const adsRev = parseFloat(document.getElementById('inp_ads').value) || 0;
+  const eventsRev = parseFloat(document.getElementById('inp_events').value) || 0;
+  const fSold = parseInt(document.getElementById('inp_f_sold').value) || 0;
+  const country = document.getElementById('inp_country').value;
+  const mfRoyaltyPct = parseFloat(document.getElementById('inp_mf_royalty').value) || 1.5;
+  const fRoyaltyPct = parseFloat(document.getElementById('inp_f_royalty').value) || 3;
+  const mfLicShare = parseFloat(document.getElementById('inp_mf_lic').value) || 15;
+  const mfAdsShare = parseFloat(document.getElementById('inp_mf_ads').value) || 15;
+
+  const mult = CONFIG.country_mult[country] || 1.0;
+
+  // GMV
+  const gmv = transactions * propVal;
+  const commissionPool = gmv * (commPct / 100);
+
+  // Royalties
+  const hqRoyalty = gmv * (CONFIG.hq_royalty_pct / 100);
+  const mfRoyalty = gmv * (mfRoyaltyPct / 100);
+  const fRoyalty = gmv * (fRoyaltyPct / 100);
+
+  // SaaS Licences total platform revenue
+  const totalSaas = (agents * CONFIG.agent_p2) + (agencies * CONFIG.agency_p1) + (devs * CONFIG.dev_p1) + (clients * CONFIG.client_vip) + (affiliates * CONFIG.affiliate_p2);
+
+  // MF gets % of total SaaS
+  const mfSaas = totalSaas * (mfLicShare / 100);
+  const fSaas = totalSaas * (CONFIG.f_licence_share / 100);
+
+  // Ads & Events
+  const mfAds = adsRev * (mfAdsShare / 100);
+  const fAds = adsRev * (CONFIG.f_ads_share / 100);
+  const mfEvents = eventsRev * (mfAdsShare / 100);
+  const fEvents = eventsRev * (CONFIG.f_events_share / 100);
+
+  // Franchise setup revenue (MF gets 15% of setup fee)
+  const fSetupTotal = fSold * CONFIG.f_setup_avg;
+  const mfSetup = fSetupTotal * 0.15;
+  const fSaasRecurring = fSold * CONFIG.f_saas_avg * (mfLicShare / 100);
+
+  // MF Total
+  const mfTotal = mfRoyalty + mfSaas + mfAds + mfEvents + mfSetup + fSaasRecurring;
+  // F Total (single franchise under MF)
+  const fTotal = fRoyalty + fSaas + fAds + fEvents;
+
+  return {
+    gmv, commissionPool, hqRoyalty, mfRoyalty, fRoyalty,
+    totalSaas, mfSaas, fSaas,
+    adsRev, mfAds, fAds,
+    eventsRev, mfEvents, fEvents,
+    fSetupTotal, mfSetup, fSaasRecurring,
+    mfTotal, fTotal,
+    growthPct, mult,
+    agents, agencies, devs, clients, affiliates, transactions,
+    mfLicShare, mfAdsShare, mfRoyaltyPct, fRoyaltyPct
+  };
 }
 
 function recalc() {
-  const propVal = parseFloat(document.getElementById('inp_prop_val').value)||250000;
-  const commPct = parseFloat(document.getElementById('inp_commission').value)||2;
-  const agents  = parseInt(document.getElementById('inp_agents').value)||0;
-  const agencies= parseInt(document.getElementById('inp_agencies').value)||0;
-  const devs    = parseInt(document.getElementById('inp_devs').value)||0;
-  const clients = parseInt(document.getElementById('inp_clients').value)||0;
-  const txns    = parseInt(document.getElementById('inp_transactions').value)||0;
-  const ads     = parseFloat(document.getElementById('inp_ads').value)||0;
-  const events  = parseFloat(document.getElementById('inp_events').value)||0;
-  const f_sold  = parseInt(document.getElementById('inp_f_sold').value)||0;
-  const growth  = parseFloat(document.getElementById('inp_growth').value)||20;
-
-  // GMV
-  const monthly_gmv = txns * propVal;
-  const annual_gmv  = monthly_gmv * 12;
-  const gmv_tier    = getGMVTier(annual_gmv);
-
-  // Royalty
-  const royalty_gross = monthly_gmv * commPct / 100;
-  const royalty_mf    = royalty_gross * gmv_tier.mf / 100;
-  const royalty_f     = royalty_gross * gmv_tier.f  / 100;
-  const royalty_hq    = royalty_gross * gmv_tier.hq / 100;
-
-  // Licence SaaS
-  const total_lic = agents + agencies + devs;
-  const lic_tier  = getLicTier(total_lic);
-  const lic_gross = agents*S.agent_avg + agencies*S.agency_avg + devs*S.dev_avg + clients*S.client_vip;
-  const lic_mf    = lic_gross * lic_tier.mf / 100;
-  const lic_f     = lic_gross * lic_tier.f  / 100;
-  const lic_hq    = lic_gross * (100 - lic_tier.mf - lic_tier.f - lic_tier.ref) / 100;
-
-  // Ads
-  const ads_mf = ads * S.ads_mf / 100;
-  const ads_f  = ads * S.ads_f  / 100;
-  const ads_hq = ads - ads_mf - ads_f;
-
-  // Events
-  const evt_mf = events * S.evt_mf / 100;
-  const evt_f  = events * S.evt_f  / 100;
-  const evt_hq = events - evt_mf - evt_f;
-
-  // F Licence (MF gets % of F setup fees)
-  const f_setup_monthly = f_sold * S.f_setup_avg / 12; // amortized
-  const f_saas_monthly  = f_sold * S.f_monthly_avg;
-  const f_rev_mf        = (f_setup_monthly + f_saas_monthly) * lic_tier.mf / 100;
-
-  // TOTALS
-  const mf_monthly = royalty_mf + lic_mf + ads_mf + evt_mf + f_rev_mf;
-  const mf_annual  = mf_monthly * 12;
-  const f_monthly  = royalty_f  + lic_f  + ads_f  + evt_f;
+  const d = calcRevenue();
+  const monthly = currentView === 'f' ? d.fTotal : d.mfTotal;
+  const annual = monthly * 12;
+  const mfInvest = parseFloat(document.getElementById('inp_mf_invest').value) || 50000;
+  const opCosts = parseFloat(document.getElementById('inp_op_costs').value) || 3000;
+  const initialInvest = parseFloat(document.getElementById('inp_initial').value) || 75000;
 
   // KPIs
-  document.getElementById('kpi_monthly').textContent = '€' + Math.round(mf_monthly).toLocaleString();
-  document.getElementById('kpi_annual').textContent  = '€' + Math.round(mf_annual).toLocaleString();
-  document.getElementById('kpi_gmv').textContent     = '€' + Math.round(monthly_gmv).toLocaleString();
-  document.getElementById('kpi_annual_trend').textContent = '↑ +' + growth + '% YoY';
+  document.getElementById('kpi_monthly').textContent = fmtK(monthly);
+  document.getElementById('kpi_annual').textContent = fmtK(annual);
+  document.getElementById('kpi_gmv').textContent = fmtK(d.gmv);
+  document.getElementById('kpi_saas').textContent = fmtK(currentView === 'f' ? d.fSaas : d.mfSaas);
+  document.getElementById('kpi_royalty').textContent = fmtK(currentView === 'f' ? d.fRoyalty : d.mfRoyalty);
+  document.getElementById('kpi_ads_rev').textContent = fmtK(currentView === 'f' ? (d.fAds + d.fEvents) : (d.mfAds + d.mfEvents));
+  document.getElementById('kpi_setup').textContent = fmtK(currentView === 'f' ? 0 : (d.mfSetup + d.fSaasRecurring));
 
   // Break-even
-  const mf_cost = S.mf_annual + S.mf_monthly * 12;
-  const be_month = mf_monthly > 0 ? Math.ceil(mf_cost / mf_monthly) : 99;
-  document.getElementById('kpi_breakeven').textContent = be_month <= 60 ? 'M' + be_month : '60M+';
+  const monthlyNet = monthly - opCosts - (mfInvest / 12);
+  const be = monthlyNet > 0 ? Math.ceil(initialInvest / monthlyNet) : 99;
+  document.getElementById('kpi_breakeven').textContent = be < 99 ? 'M' + be : '> 5Y';
+  document.getElementById('kpi_be_trend').textContent = be <= 12 ? '✅ < 1 Year' : be <= 24 ? '⚡ 1-2 Years' : '⏳ > 2 Years';
+  document.getElementById('kpi_annual_trend').textContent = '↑ +' + Math.round(d.growthPct) + '% YoY';
 
-  // Breakdown table
-  const rows = [
-    {label:'Transaction Royalties', gross:royalty_gross, hq_pct:gmv_tier.hq, hq:royalty_hq, mf_pct:gmv_tier.mf, mf:royalty_mf, f_pct:gmv_tier.f, f:royalty_f},
-    {label:'SaaS Licences', gross:lic_gross, hq_pct:100-lic_tier.mf-lic_tier.f-lic_tier.ref, hq:lic_hq, mf_pct:lic_tier.mf, mf:lic_mf, f_pct:lic_tier.f, f:lic_f},
-    {label:'Advertising Credits', gross:ads, hq_pct:100-S.ads_mf-S.ads_f, hq:ads_hq, mf_pct:S.ads_mf, mf:ads_mf, f_pct:S.ads_f, f:ads_f},
-    {label:'Events & Tickets', gross:events, hq_pct:100-S.evt_mf-S.evt_f, hq:evt_hq, mf_pct:S.evt_mf, mf:evt_mf, f_pct:S.evt_f, f:evt_f},
-    {label:'F Licence Revenue (MF share)', gross:f_setup_monthly+f_saas_monthly, hq_pct:0, hq:0, mf_pct:lic_tier.mf, mf:f_rev_mf, f_pct:0, f:0},
-  ];
-  const total_gross = rows.reduce((s,r)=>s+r.gross,0);
-  const total_mf    = rows.reduce((s,r)=>s+r.mf,0);
-  const total_f     = rows.reduce((s,r)=>s+r.f,0);
-  const total_hq    = rows.reduce((s,r)=>s+r.hq,0);
-
-  const tbody = document.getElementById('breakdown_body');
-  tbody.innerHTML = rows.map(r => `
-    <tr>
-      <td>${r.label}</td>
-      <td class="amount-cell">€${Math.round(r.gross).toLocaleString()}</td>
-      <td class="hq-row"><span class="pct-cell">${r.hq_pct}%</span> = €${Math.round(r.hq).toLocaleString()}</td>
-      <td><span class="pct-cell">${r.mf_pct}%</span> = <b>€${Math.round(r.mf).toLocaleString()}</b></td>
-      <td><span class="pct-cell">${r.f_pct}%</span> = €${Math.round(r.f).toLocaleString()}</td>
-      <td style="font-weight:900;color:var(--gold)">€${Math.round(currentView==='f'?r.f:r.mf).toLocaleString()}</td>
-    </tr>
-  `).join('') + `
-    <tr>
-      <td><b>TOTAL MONTHLY</b></td>
-      <td class="amount-cell"><b>€${Math.round(total_gross).toLocaleString()}</b></td>
-      <td class="hq-row"><b>€${Math.round(total_hq).toLocaleString()}</b></td>
-      <td><b>€${Math.round(total_mf).toLocaleString()}</b></td>
-      <td><b>€${Math.round(total_f).toLocaleString()}</b></td>
-      <td style="font-weight:900;font-size:16px;color:var(--gold)">€${Math.round(currentView==='f'?total_f:total_mf).toLocaleString()}</td>
-    </tr>`;
-
-  // Charts
-  updateCharts(mf_monthly, mf_annual, growth, be_month, mf_cost, {
-    royalty: royalty_mf, saas: lic_mf, ads: ads_mf, events: evt_mf, f_rev: f_rev_mf
-  });
+  // Update cascade cards
+  updateCascade(d);
+  // Update breakdown table
+  updateBreakdown(d);
+  // Update charts
+  updateCharts(d, monthly, annual);
+  // Update ROI
+  updateROI(d, monthly, mfInvest, opCosts, initialInvest);
 }
 
-function updateCharts(monthly, annual, growthPct, be_month, mf_cost, streams) {
+function updateCascade(d) {
+  const cards = document.getElementById('cascade_cards');
+  cards.innerHTML = `
+    <div class="cascade-card hq">
+      <div class="cascade-card-title">Level 1</div>
+      <div class="cascade-card-name">Investra <span>HQ</span></div>
+      <div class="cascade-row"><span class="cascade-row-label">GMV Royalty (2%)</span><span class="cascade-row-value gold">${fmt(d.hqRoyalty)}</span></div>
+      <div class="cascade-row"><span class="cascade-row-label">Platform SaaS (net)</span><span class="cascade-row-value gold">${fmt(d.totalSaas * 0.7)}</span></div>
+      <div class="cascade-row"><span class="cascade-row-label">Ads/Events (net)</span><span class="cascade-row-value gold">${fmt((d.adsRev + d.eventsRev) * 0.7)}</span></div>
+      <div class="cascade-row"><span class="cascade-row-label">Total Monthly</span><span class="cascade-total">${fmtK(d.hqRoyalty + d.totalSaas * 0.7 + (d.adsRev + d.eventsRev) * 0.7)}</span></div>
+    </div>
+    <div class="cascade-card mf">
+      <div class="cascade-card-title">Level 2</div>
+      <div class="cascade-card-name">Master <span>Franchise</span></div>
+      <div class="cascade-row"><span class="cascade-row-label">GMV Royalty (${d.mfRoyaltyPct}%)</span><span class="cascade-row-value gold">${fmt(d.mfRoyalty)}</span></div>
+      <div class="cascade-row"><span class="cascade-row-label">Licence Share (${d.mfLicShare}%)</span><span class="cascade-row-value gold">${fmt(d.mfSaas)}</span></div>
+      <div class="cascade-row"><span class="cascade-row-label">Ads Share (${d.mfAdsShare}%)</span><span class="cascade-row-value gold">${fmt(d.mfAds + d.mfEvents)}</span></div>
+      <div class="cascade-row"><span class="cascade-row-label">F Setup Revenue</span><span class="cascade-row-value gold">${fmt(d.mfSetup + d.fSaasRecurring)}</span></div>
+      <div class="cascade-row"><span class="cascade-row-label">Total Monthly</span><span class="cascade-total">${fmtK(d.mfTotal)}</span></div>
+    </div>
+    <div class="cascade-card f">
+      <div class="cascade-card-title">Level 3</div>
+      <div class="cascade-card-name">Standard <span>Franchise</span></div>
+      <div class="cascade-row"><span class="cascade-row-label">GMV Royalty (${d.fRoyaltyPct}%)</span><span class="cascade-row-value gold">${fmt(d.fRoyalty)}</span></div>
+      <div class="cascade-row"><span class="cascade-row-label">Licence Share (10%)</span><span class="cascade-row-value gold">${fmt(d.fSaas)}</span></div>
+      <div class="cascade-row"><span class="cascade-row-label">Ads Share (10%)</span><span class="cascade-row-value gold">${fmt(d.fAds + d.fEvents)}</span></div>
+      <div class="cascade-row"><span class="cascade-row-label">Total Monthly</span><span class="cascade-total">${fmtK(d.fTotal)}</span></div>
+    </div>
+  `;
+
+  // Cascade table
+  const tbody = document.getElementById('cascade_tbody');
+  const rows = [
+    ['GMV Royalties', fmt(d.gmv * 0.065), fmt(d.hqRoyalty), fmt(d.mfRoyalty), fmt(d.fRoyalty), '—'],
+    ['SaaS Licences', fmt(d.totalSaas), fmt(d.totalSaas * 0.7), fmt(d.mfSaas), fmt(d.fSaas), fmt(d.totalSaas * 0.05)],
+    ['Ad Credits', fmt(d.adsRev), fmt(d.adsRev * 0.7), fmt(d.mfAds), fmt(d.fAds), fmt(d.adsRev * 0.03)],
+    ['Events & PR', fmt(d.eventsRev), fmt(d.eventsRev * 0.7), fmt(d.mfEvents), fmt(d.fEvents), fmt(d.eventsRev * 0.05)],
+    ['F Setup Fees', fmt(d.fSetupTotal), '—', fmt(d.mfSetup), '—', '—'],
+  ];
+  const totals = rows.reduce((acc, r) => {
+    // skip non-numeric
+    return acc;
+  }, {});
+  tbody.innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td class="amount-cell">${r[1]}</td><td class="hq-row">${r[2]}</td><td class="pct-cell">${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td></tr>`).join('') +
+    `<tr><td><strong>TOTAL</strong></td><td class="amount-cell"><strong>${fmt(d.gmv * 0.065 + d.totalSaas + d.adsRev + d.eventsRev + d.fSetupTotal)}</strong></td><td class="hq-row"><strong>${fmt(d.hqRoyalty + d.totalSaas * 0.7 + d.adsRev * 0.7 + d.eventsRev * 0.7)}</strong></td><td class="pct-cell"><strong>${fmt(d.mfTotal)}</strong></td><td><strong>${fmt(d.fTotal)}</strong></td><td>—</td></tr>`;
+}
+
+function updateBreakdown(d) {
+  const monthly = currentView === 'f' ? d.fTotal : d.mfTotal;
+  const rows = currentView === 'f' ? [
+    ['GMV Royalty (' + d.fRoyaltyPct + '% of GMV)', 'Transactions × Prop. Value × ' + d.fRoyaltyPct + '%', d.fRoyalty],
+    ['SaaS Licence Share (10%)', 'Total Platform SaaS × 10%', d.fSaas],
+    ['Ad Credits Share (10%)', 'Ad Revenue × 10%', d.fAds],
+    ['Events & PR Share (10%)', 'Events Revenue × 10%', d.fEvents],
+  ] : [
+    ['GMV Royalty (' + d.mfRoyaltyPct + '% of GMV)', 'Transactions × Prop. Value × ' + d.mfRoyaltyPct + '%', d.mfRoyalty],
+    ['SaaS Licence Share (' + d.mfLicShare + '%)', 'Total Platform SaaS × ' + d.mfLicShare + '%', d.mfSaas],
+    ['Ad Credits Share (' + d.mfAdsShare + '%)', 'Ad Revenue × ' + d.mfAdsShare + '%', d.mfAds],
+    ['Events & PR Share (' + d.mfAdsShare + '%)', 'Events Revenue × ' + d.mfAdsShare + '%', d.mfEvents],
+    ['F Setup Revenue (15%)', 'F Sold × Setup Fee × 15%', d.mfSetup],
+    ['F SaaS Recurring (15%)', 'F Count × SaaS Fee × 15%', d.fSaasRecurring],
+  ];
+  const tbody = document.getElementById('breakdown_tbody');
+  tbody.innerHTML = rows.map(r => {
+    const pct = monthly > 0 ? ((r[2] / monthly) * 100).toFixed(1) : 0;
+    return `<tr><td>${r[0]}</td><td style="color:var(--gray);font-size:12px;">${r[1]}</td><td class="amount-cell">${fmt(r[2])}</td><td class="amount-cell">${fmt(r[2] * 12)}</td><td class="pct-cell">${pct}%</td></tr>`;
+  }).join('') + `<tr><td><strong>TOTAL</strong></td><td></td><td class="amount-cell"><strong>${fmt(monthly)}</strong></td><td class="amount-cell"><strong>${fmt(monthly * 12)}</strong></td><td class="pct-cell"><strong>100%</strong></td></tr>`;
+}
+
+function updateCharts(d, monthly, annual) {
   const months = currentHorizon;
-  const labels = Array.from({length:months}, (_,i) => {
-    const d = new Date(); d.setMonth(d.getMonth()+i);
-    return d.toLocaleString('en',{month:'short',year:'2-digit'});
-  });
+  const growthPct = d.growthPct;
+  const labels = [];
+  const now = new Date();
+  for (let i = 0; i < months; i++) {
+    const m = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    labels.push(months <= 12 ? m.toLocaleString('en', {month:'short', year:'2-digit'}) : (i % 3 === 0 ? m.toLocaleString('en', {month:'short', year:'2-digit'}) : ''));
+  }
 
-  // Growth projection
-  const growthData = Array.from({length:months}, (_,i) => {
-    const yr = Math.floor(i/12);
-    return Math.round(monthly * Math.pow(1 + growthPct/100, yr));
-  });
-
+  // Growth chart
+  const growthData = [];
+  const fGrowthData = [];
+  for (let i = 0; i < months; i++) {
+    const yr = i / 12;
+    growthData.push(Math.round(d.mfTotal * Math.pow(1 + growthPct / 100, yr)));
+    fGrowthData.push(Math.round(d.fTotal * Math.pow(1 + growthPct / 100, yr)));
+  }
   if (charts.growth) charts.growth.destroy();
   charts.growth = new Chart(document.getElementById('chart_growth'), {
     type: 'line',
     data: {
       labels,
-      datasets: [{
-        label: 'Monthly Revenue (€)',
-        data: growthData,
-        borderColor: '#C9A84C',
-        backgroundColor: 'rgba(201,168,76,0.1)',
-        fill: true,
-        tension: 0.4,
-        pointRadius: 3,
-        pointBackgroundColor: '#C9A84C'
-      }]
+      datasets: [
+        {label:'MF Revenue', data:growthData, borderColor:'#C9A84C', backgroundColor:'rgba(201,168,76,0.1)', fill:true, tension:0.4, pointRadius:2},
+        {label:'F Revenue (single)', data:fGrowthData, borderColor:'#3B82F6', backgroundColor:'rgba(59,130,246,0.05)', fill:true, tension:0.4, pointRadius:2, borderDash:[5,5]}
+      ]
     },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {legend:{display:false}},
-      scales: {
-        y: {ticks:{callback:v=>'€'+v.toLocaleString()}, grid:{color:'rgba(0,0,0,0.05)'}},
-        x: {grid:{display:false}}
-      }
-    }
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmtK(v)},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false},ticks:{font:{size:10}}}}}
   });
 
   // Breakdown pie
+  const pieData = currentView === 'f'
+    ? [d.fRoyalty, d.fSaas, d.fAds + d.fEvents]
+    : [d.mfRoyalty, d.mfSaas, d.mfAds + d.mfEvents, d.mfSetup + d.fSaasRecurring];
+  const pieLabels = currentView === 'f'
+    ? ['GMV Royalty', 'SaaS Licences', 'Ads & Events']
+    : ['GMV Royalty', 'SaaS Licences', 'Ads & Events', 'F Setup & SaaS'];
   if (charts.breakdown) charts.breakdown.destroy();
   charts.breakdown = new Chart(document.getElementById('chart_breakdown'), {
     type: 'doughnut',
-    data: {
-      labels: ['Royalties','SaaS Licences','Advertising','Events','F Licences'],
-      datasets: [{
-        data: [streams.royalty, streams.saas, streams.ads, streams.events, streams.f_rev].map(v=>Math.max(0,Math.round(v))),
-        backgroundColor: ['#C9A84C','#10B981','#3B82F6','#8B5CF6','#F59E0B'],
-        borderWidth: 0
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {legend:{position:'bottom', labels:{font:{size:11}}}}
-    }
+    data: {labels: pieLabels, datasets:[{data:pieData, backgroundColor:['#C9A84C','#10B981','#3B82F6','#8B5CF6'], borderWidth:2, borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)+' ('+((ctx.raw/monthly)*100).toFixed(1)+'%)'}}}}
   });
 
   // Break-even
-  const cumRevenue = [];
-  const cumCost = [];
+  const mfInvest = parseFloat(document.getElementById('inp_mf_invest').value) || 50000;
+  const opCosts = parseFloat(document.getElementById('inp_op_costs').value) || 3000;
+  const initialInvest = parseFloat(document.getElementById('inp_initial').value) || 75000;
+  const cumRev = [], cumCost = [];
   let cum = 0;
-  for (let i=0; i<months; i++) {
-    const yr = Math.floor(i/12);
-    cum += monthly * Math.pow(1 + growthPct/100, yr);
-    cumRevenue.push(Math.round(cum));
-    cumCost.push(Math.round(mf_cost * (1 + i/12)));
+  for (let i = 0; i < months; i++) {
+    const yr = i / 12;
+    cum += monthly * Math.pow(1 + growthPct / 100, yr);
+    cumRev.push(Math.round(cum));
+    cumCost.push(Math.round(initialInvest + (opCosts + mfInvest / 12) * (i + 1)));
   }
   if (charts.breakeven) charts.breakeven.destroy();
   charts.breakeven = new Chart(document.getElementById('chart_breakeven'), {
     type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {label:'Cumulative Revenue',data:cumRevenue,borderColor:'#10B981',backgroundColor:'rgba(16,185,129,0.1)',fill:true,tension:0.4},
-        {label:'Cumulative Cost',data:cumCost,borderColor:'#EF4444',backgroundColor:'rgba(239,68,68,0.05)',fill:true,tension:0.1,borderDash:[5,5]}
-      ]
-    },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
-      scales:{y:{ticks:{callback:v=>'€'+v.toLocaleString()},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}
-    }
+    data: {labels, datasets: [
+      {label:'Cumulative Revenue', data:cumRev, borderColor:'#10B981', backgroundColor:'rgba(16,185,129,0.1)', fill:true, tension:0.4, pointRadius:2},
+      {label:'Cumulative Cost', data:cumCost, borderColor:'#EF4444', backgroundColor:'rgba(239,68,68,0.05)', fill:true, tension:0.1, borderDash:[5,5], pointRadius:2}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmtK(v)},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false},ticks:{font:{size:10}}}}}
   });
 
-  // Annual comparison
-  const growthFactor = 1 + growthPct/100;
+  // Annual bar
+  const gf = 1 + growthPct / 100;
   if (charts.annual) charts.annual.destroy();
   charts.annual = new Chart(document.getElementById('chart_annual'), {
     type: 'bar',
     data: {
-      labels: ['Year 1','Year 2','Year 3'],
-      datasets: [{
-        label: 'Annual Revenue (€)',
-        data: [Math.round(annual), Math.round(annual*growthFactor), Math.round(annual*growthFactor*growthFactor)],
-        backgroundColor: ['#C9A84C','#F0D080','#10B981'],
-        borderRadius: 8
-      }]
+      labels: ['Year 1', 'Year 2', 'Year 3'],
+      datasets: [
+        {label:'MF Annual Revenue', data:[Math.round(annual), Math.round(annual * gf), Math.round(annual * gf * gf)], backgroundColor:['#C9A84C','#F0D080','#10B981'], borderRadius:8},
+        {label:'F Annual Revenue', data:[Math.round(d.fTotal * 12), Math.round(d.fTotal * 12 * gf), Math.round(d.fTotal * 12 * gf * gf)], backgroundColor:['rgba(59,130,246,0.7)','rgba(59,130,246,0.5)','rgba(59,130,246,0.3)'], borderRadius:8}
+      ]
     },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{y:{ticks:{callback:v=>'€'+v.toLocaleString()},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}
-    }
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmtK(v)},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}}
+  });
+
+  // Stacked chart
+  const stackedMonths = Math.min(months, 24);
+  const stackLabels = labels.slice(0, stackedMonths);
+  const royaltyData = [], saasData = [], adsData = [], setupData = [];
+  for (let i = 0; i < stackedMonths; i++) {
+    const yr = i / 12;
+    const gf2 = Math.pow(1 + growthPct / 100, yr);
+    royaltyData.push(Math.round(d.mfRoyalty * gf2));
+    saasData.push(Math.round(d.mfSaas * gf2));
+    adsData.push(Math.round((d.mfAds + d.mfEvents) * gf2));
+    setupData.push(Math.round((d.mfSetup + d.fSaasRecurring) * gf2));
+  }
+  if (charts.stacked) charts.stacked.destroy();
+  charts.stacked = new Chart(document.getElementById('chart_stacked'), {
+    type: 'bar',
+    data: {
+      labels: stackLabels,
+      datasets: [
+        {label:'GMV Royalty', data:royaltyData, backgroundColor:'#C9A84C', stack:'revenue'},
+        {label:'SaaS Licences', data:saasData, backgroundColor:'#10B981', stack:'revenue'},
+        {label:'Ads & Events', data:adsData, backgroundColor:'#3B82F6', stack:'revenue'},
+        {label:'F Setup & SaaS', data:setupData, backgroundColor:'#8B5CF6', stack:'revenue'},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:v=>fmtK(v)},grid:{color:'rgba(0,0,0,0.05)'}}}}
   });
 }
 
-function setView(view, btn) {
-  currentView = view;
-  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  recalc();
+function updateROI(d, monthly, mfInvest, opCosts, initialInvest) {
+  const monthlyCost = opCosts + mfInvest / 12;
+  const netMonthly = monthly - monthlyCost;
+  const netAnnual = netMonthly * 12;
+  const roi = initialInvest > 0 ? (netAnnual / initialInvest) * 100 : 0;
+  const payback = netMonthly > 0 ? Math.ceil(initialInvest / netMonthly) : 999;
+
+  document.getElementById('roi_net_monthly').textContent = fmtK(netMonthly);
+  document.getElementById('roi_net_annual').textContent = fmtK(netAnnual);
+  document.getElementById('roi_pct').textContent = roi.toFixed(0) + '%';
+  document.getElementById('roi_payback').textContent = payback < 999 ? payback + ' mo' : '> 5Y';
+  document.getElementById('roi_net_trend').textContent = netMonthly > 0 ? '✅ Profitable' : '⚠️ Not yet profitable';
+  document.getElementById('roi_net_trend').className = 'kpi-trend ' + (netMonthly > 0 ? 'up' : 'down');
+  document.getElementById('roi_annual_trend').textContent = netAnnual > 0 ? '✅ Net positive' : '⚠️ Net negative';
+  document.getElementById('roi_payback_trend').textContent = payback <= 12 ? '✅ < 1 Year' : payback <= 24 ? '⚡ 1-2 Years' : '⏳ > 2 Years';
+
+  const months = currentHorizon;
+  const labels = [];
+  const now = new Date();
+  for (let i = 0; i < months; i++) {
+    const m = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    labels.push(m.toLocaleString('en', {month:'short', year:'2-digit'}));
+  }
+  const netData = [], revenueData = [], costData = [];
+  for (let i = 0; i < months; i++) {
+    const yr = i / 12;
+    const gf = Math.pow(1 + d.growthPct / 100, yr);
+    const rev = monthly * gf;
+    const cost = monthlyCost;
+    revenueData.push(Math.round(rev));
+    costData.push(Math.round(cost));
+    netData.push(Math.round(rev - cost));
+  }
+  if (charts.roi) charts.roi.destroy();
+  charts.roi = new Chart(document.getElementById('chart_roi'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {label:'Revenue', data:revenueData, backgroundColor:'rgba(201,168,76,0.7)', borderRadius:4, stack:'a'},
+        {label:'Costs', data:costData.map(v => -v), backgroundColor:'rgba(239,68,68,0.5)', borderRadius:4, stack:'b'},
+        {label:'Net Profit', data:netData, type:'line', borderColor:'#10B981', backgroundColor:'rgba(16,185,129,0.1)', fill:true, tension:0.4, pointRadius:3}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmtK(Math.abs(v))},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
 }
-function setHorizon(months, btn) {
-  currentHorizon = months;
-  document.querySelectorAll('.horizon-btn').forEach(b=>b.classList.remove('active'));
+
+// =============================================
+// SCENARIOS
+// =============================================
+const SCENARIOS = {
+  conservative: {agents:20, agencies:5, devs:2, clients:30, affiliates:5, transactions:3, ads:500, events:100, f_sold:1, prop_val:200000, commission:1.5, growth:10},
+  realistic: {agents:50, agencies:10, devs:5, clients:100, affiliates:20, transactions:8, ads:2000, events:500, f_sold:3, prop_val:250000, commission:2, growth:20},
+  optimistic: {agents:120, agencies:25, devs:12, clients:300, affiliates:50, transactions:20, ads:6000, events:2000, f_sold:8, prop_val:300000, commission:2.5, growth:40},
+  premium: {agents:80, agencies:15, devs:20, clients:200, affiliates:30, transactions:15, ads:10000, events:5000, f_sold:5, prop_val:800000, commission:3, growth:30}
+};
+
+function loadScenario(name, btn) {
+  const s = SCENARIOS[name];
+  if (!s) return;
+  document.getElementById('inp_agents').value = s.agents;
+  document.getElementById('inp_agencies').value = s.agencies;
+  document.getElementById('inp_devs').value = s.devs;
+  document.getElementById('inp_clients').value = s.clients;
+  document.getElementById('inp_affiliates').value = s.affiliates;
+  document.getElementById('inp_transactions').value = s.transactions;
+  document.getElementById('inp_ads').value = s.ads;
+  document.getElementById('inp_events').value = s.events;
+  document.getElementById('inp_f_sold').value = s.f_sold;
+  document.getElementById('inp_prop_val').value = s.prop_val;
+  document.getElementById('inp_commission').value = s.commission;
+  document.getElementById('inp_comm_val').textContent = s.commission.toFixed(1) + '%';
+  document.getElementById('inp_growth').value = s.growth;
+  document.getElementById('inp_growth_val').textContent = s.growth + '%';
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   recalc();
 }
 
-// Init
+// =============================================
+// VIEW & HORIZON
+// =============================================
+function setView(view, btn) {
+  currentView = view;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const labels = {mf:'MF Monthly Revenue', f:'F Monthly Revenue', full:'MF Monthly Revenue'};
+  document.getElementById('kpi1_label').textContent = labels[view] || 'Monthly Revenue';
+  document.getElementById('kpi2_label').textContent = view === 'f' ? 'F Annual Revenue' : 'MF Annual Revenue';
+  recalc();
+}
+
+function setHorizon(months, btn) {
+  currentHorizon = months;
+  document.querySelectorAll('.horizon-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('chart_growth_sub').textContent = 'Monthly revenue over ' + (months === 12 ? '12 months' : months === 36 ? '3 years' : '5 years');
+  recalc();
+}
+
+// =============================================
+// TABS
+// =============================================
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab_' + name).classList.add('active');
+  btn.classList.add('active');
+  // Re-render charts when switching to charts tab
+  if (name === 'charts' || name === 'roi') {
+    setTimeout(recalc, 50);
+  }
+}
+
+// =============================================
+// INIT
+// =============================================
 window.onload = () => {
   const role = sessionStorage.getItem('inv_role') || 'mf';
   const country = sessionStorage.getItem('inv_country') || 'si';
-  const countryNames = {si:'Slovenia',hr:'Croatia',rs:'Serbia',ba:'BiH',cy:'TRNC',tr:'Turkey',de:'Germany'};
+  const countryNames = {si:'Slovenia', hr:'Croatia', rs:'Serbia', ba:'BiH', cy:'TRNC', tr:'Turkey', de:'Germany', ae:'Dubai/UAE'};
   document.getElementById('sidebar_country').textContent = countryNames[country] || country;
+  document.getElementById('role_badge').className = 'role-badge ' + role;
   document.getElementById('role_badge').textContent = role === 'admin' ? '🏛️ Admin HQ' : role === 'mf' ? '🏆 Master Franchise' : '🏪 Franchise';
   document.getElementById('role_notice_text').innerHTML = `Viewing as: <strong>${role === 'admin' ? 'Admin HQ' : role === 'mf' ? 'Master Franchise — ' + countryNames[country] : 'Franchise — ' + countryNames[country]}</strong>`;
   if (role === 'admin') document.getElementById('admin_link').style.display = 'flex';
-  if (role === 'f') { document.getElementById('f_view_btn').click(); }
+  if (role === 'f') {
+    document.getElementById('btn_f').click();
+    // Hide full cascade for F role
+    document.getElementById('btn_full').style.display = 'none';
+  }
   try { document.getElementById('inp_country').value = country; } catch(e){}
   recalc();
 };
