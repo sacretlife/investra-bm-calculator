@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investra — Revenue Model Preview (A, B, C)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --navy: #0A1628;
+    --gold: #C9A84C;
+    --gold-light: #F0D080;
+    --white: #FFFFFF;
+    --gray-bg: #F5F6FA;
+    --gray-text: #6B7280;
+    --green: #10B981;
+    --blue: #3B82F6;
+    --purple: #8B5CF6;
+    --border: #E5E7EB;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--gray-bg); color: var(--navy); }
+
+  /* HEADER */
+  .header {
+    background: var(--navy);
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .header-logo { display: flex; align-items: center; gap: 12px; }
+  .header-logo svg { width: 36px; height: 36px; }
+  .header-title { color: var(--white); font-size: 20px; font-weight: 700; }
+  .header-subtitle { color: var(--gold); font-size: 13px; }
+  .header-badge {
+    background: var(--gold); color: var(--navy);
+    padding: 6px 16px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; letter-spacing: 1px;
+  }
+
+  /* INTRO */
+  .intro {
+    background: linear-gradient(135deg, var(--navy) 0%, #1a2f52 100%);
+    padding: 48px 40px;
+    text-align: center;
+    color: var(--white);
+  }
+  .intro h1 { font-size: 32px; font-weight: 800; margin-bottom: 12px; }
+  .intro h1 span { color: var(--gold); }
+  .intro p { font-size: 16px; color: rgba(255,255,255,0.75); max-width: 700px; margin: 0 auto 24px; }
+  .model-tabs {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+  }
+  .model-tab {
+    padding: 10px 28px; border-radius: 30px; font-size: 14px; font-weight: 700;
+    cursor: pointer; border: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .tab-a { background: rgba(59,130,246,0.2); color: #93C5FD; border-color: #3B82F6; }
+  .tab-b { background: rgba(201,168,76,0.2); color: var(--gold-light); border-color: var(--gold); }
+  .tab-c { background: rgba(139,92,246,0.2); color: #C4B5FD; border-color: #8B5CF6; }
+  .tab-all { background: rgba(16,185,129,0.2); color: #6EE7B7; border-color: #10B981; }
+  .model-tab.active { color: var(--navy); }
+  .tab-a.active { background: #3B82F6; }
+  .tab-b.active { background: var(--gold); }
+  .tab-c.active { background: #8B5CF6; }
+  .tab-all.active { background: #10B981; }
+
+  /* MAIN CONTENT */
+  .container { max-width: 1400px; margin: 0 auto; padding: 40px; }
+
+  /* COMPARISON GRID */
+  .comparison-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    margin-bottom: 48px;
+  }
+  @media (max-width: 1000px) { .comparison-grid { grid-template-columns: 1fr; } }
+
+  .model-card {
+    background: var(--white); border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    border: 2px solid transparent;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .model-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+  .model-card.model-a { border-color: #3B82F6; }
+  .model-card.model-b { border-color: var(--gold); }
+  .model-card.model-c { border-color: #8B5CF6; }
+
+  .card-header {
+    padding: 24px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .model-a .card-header { background: linear-gradient(135deg, #1D4ED8, #3B82F6); }
+  .model-b .card-header { background: linear-gradient(135deg, #92600A, #C9A84C); }
+  .model-c .card-header { background: linear-gradient(135deg, #5B21B6, #8B5CF6); }
+
+  .model-icon {
+    width: 52px; height: 52px; border-radius: 12px;
+    background: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+  }
+  .card-header-text h2 { color: var(--white); font-size: 20px; font-weight: 800; }
+  .card-header-text p { color: rgba(255,255,255,0.8); font-size: 13px; margin-top: 2px; }
+  .recommended-badge {
+    margin-left: auto; background: rgba(255,255,255,0.25);
+    color: var(--white); padding: 4px 12px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .card-body { padding: 24px; }
+
+  /* SECTION WITHIN CARD */
+  .section-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--gray-text);
+    margin-bottom: 12px; margin-top: 20px;
+    padding-bottom: 6px; border-bottom: 1px solid var(--border);
+  }
+  .section-title:first-child { margin-top: 0; }
+
+  /* ROYALTY ROWS */
+  .royalty-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid #F3F4F6;
+  }
+  .royalty-row:last-child { border-bottom: none; }
+  .royalty-label { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .level-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot-hq { background: #EF4444; }
+  .dot-mf { background: #3B82F6; }
+  .dot-f  { background: #10B981; }
+  .dot-ref { background: #F59E0B; }
+  .royalty-value {
+    font-weight: 700; font-size: 15px;
+  }
+  .royalty-value.tier { font-size: 12px; color: var(--gray-text); text-align: right; }
+
+  /* CASCADE TABLE */
+  .cascade-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+  .cascade-table th {
+    background: var(--navy); color: var(--white);
+    padding: 8px 10px; text-align: left; font-size: 11px;
+  }
+  .cascade-table td { padding: 8px 10px; border-bottom: 1px solid #F3F4F6; }
+  .cascade-table tr:last-child td { border-bottom: none; }
+  .cascade-table tr:nth-child(even) td { background: #F9FAFB; }
+  .pct { font-weight: 700; color: var(--navy); }
+  .pct-green { color: #10B981; }
+  .pct-blue { color: #3B82F6; }
+  .pct-gold { color: #C9A84C; }
+  .pct-red { color: #EF4444; }
+  .dash { color: #D1D5DB; }
+
+  /* POOL BAR */
+  .pool-bar { margin: 12px 0; }
+  .pool-bar-track {
+    height: 28px; border-radius: 8px; overflow: hidden;
+    display: flex; width: 100%;
+  }
+  .pool-seg {
+    height: 100%; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--white);
+    transition: width 0.5s;
+  }
+  .seg-hq { background: #EF4444; }
+  .seg-mf { background: #3B82F6; }
+  .seg-f  { background: #10B981; }
+  .seg-ref { background: #F59E0B; }
+  .pool-legend {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* HIGHLIGHT BOX */
+  .highlight-box {
+    border-radius: 10px; padding: 14px 16px; margin-top: 16px;
+    font-size: 13px; line-height: 1.5;
+  }
+  .highlight-a { background: #EFF6FF; border-left: 4px solid #3B82F6; }
+  .highlight-b { background: #FFFBEB; border-left: 4px solid #C9A84C; }
+  .highlight-c { background: #F5F3FF; border-left: 4px solid #8B5CF6; }
+  .highlight-box strong { display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* COMPARISON TABLE SECTION */
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 24px;
+  }
+  .section-header h2 { font-size: 22px; font-weight: 800; }
+  .section-line { flex: 1; height: 2px; background: var(--border); }
+  .section-gold { color: var(--gold); }
+
+  .full-compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .full-compare-table th {
+    padding: 12px 16px; text-align: center; font-size: 12px; font-weight: 700;
+  }
+  .full-compare-table th:first-child { text-align: left; }
+  .th-a { background: #1D4ED8; color: white; }
+  .th-b { background: #92600A; color: white; }
+  .th-c { background: #5B21B6; color: white; }
+  .th-label { background: var(--navy); color: white; }
+  .full-compare-table td {
+    padding: 11px 16px; border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .full-compare-table td:first-child { text-align: left; font-weight: 600; }
+  .full-compare-table tr:nth-child(even) td { background: #F9FAFB; }
+  .full-compare-table tr:hover td { background: #F0F9FF; }
+  .check { color: #10B981; font-size: 16px; }
+  .cross { color: #EF4444; font-size: 16px; }
+  .partial { color: #F59E0B; font-size: 16px; }
+
+  /* CHART SECTION */
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 48px; }
+  @media (max-width: 800px) { .chart-grid { grid-template-columns: 1fr; } }
+  .chart-card {
+    background: var(--white); border-radius: 16px; padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+  .chart-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+
+  /* FOOTER */
+  .footer {
+    background: var(--navy); color: rgba(255,255,255,0.5);
+    text-align: center; padding: 24px;
+    font-size: 12px; margin-top: 48px;
+  }
+  .footer a { color: var(--gold); text-decoration: none; }
+
+  /* STICKY SELECTOR */
+  .sticky-selector {
+    background: var(--white); border-bottom: 2px solid var(--border);
+    padding: 12px 40px;
+    display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 73px; z-index: 90;
+  }
+  .sticky-selector label { font-size: 13px; font-weight: 600; color: var(--gray-text); }
+  .sticky-selector select {
+    padding: 8px 16px; border: 2px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-weight: 600; background: var(--white);
+    cursor: pointer;
+  }
+  .active-model-badge {
+    margin-left: auto;
+    padding: 6px 16px; border-radius: 20px;
+    font-size: 12px; font-weight: 700;
+  }
+  .badge-a { background: #EFF6FF; color: #1D4ED8; border: 1px solid #3B82F6; }
+  .badge-b { background: #FFFBEB; color: #92600A; border: 1px solid #C9A84C; }
+  .badge-c { background: #F5F3FF; color: #5B21B6; border: 1px solid #8B5CF6; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">
+    <svg viewBox="0 0 36 36" fill="none">
+      <rect width="36" height="36" rx="8" fill="#C9A84C"/>
+      <path d="M18 6L30 12V24L18 30L6 24V12L18 6Z" fill="#0A1628"/>
+      <path d="M18 10L26 14V22L18 26L10 22V14L18 10Z" fill="#C9A84C" opacity="0.4"/>
+      <circle cx="18" cy="18" r="4" fill="#C9A84C"/>
+    </svg>
+    <div>
+      <div class="header-title">Investra Business Model</div>
+      <div class="header-subtitle">Revenue Model Preview — A, B, C</div>
+    </div>
+  </div>
+  <div class="header-badge">PREVIEW MODE</div>
+</div>
+
+<!-- INTRO -->
+<div class="intro">
+  <h1>Choose Your <span>Revenue Model</span></h1>
+  <p>Compare all three revenue model proposals side by side. All percentages and parameters are fully adjustable in the Admin panel. Select a model to activate it for the full calculator.</p>
+  <div class="model-tabs">
+    <div class="model-tab tab-a active" onclick="scrollToModel('a')">🔵 Model A — Flat</div>
+    <div class="model-tab tab-b" onclick="scrollToModel('b')">🟡 Model B — Tiered ⭐</div>
+    <div class="model-tab tab-c" onclick="scrollToModel('c')">🟣 Model C — Pool</div>
+    <div class="model-tab tab-all" onclick="scrollToModel('compare')">📊 Full Comparison</div>
+  </div>
+</div>
+
+<!-- STICKY MODEL SELECTOR -->
+<div class="sticky-selector">
+  <label>Active Model for Calculator:</label>
+  <select id="activeModelSelect" onchange="setActiveModel(this.value)">
+    <option value="a">Model A — Flat Royalty</option>
+    <option value="b" selected>Model B — Tiered Royalty (Recommended)</option>
+    <option value="c">Model C — Split Pool</option>
+  </select>
+  <div class="active-model-badge badge-b" id="activeBadge">⭐ Model B Active</div>
+</div>
+
+<div class="container">
+
+  <!-- 3-COLUMN PREVIEW GRID -->
+  <div class="section-header" id="model-a">
+    <h2>Revenue Model <span class="section-gold">Proposals</span></h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="comparison-grid">
+
+    <!-- MODEL A -->
+    <div class="model-card model-a" id="card-a">
+      <div class="card-header">
+        <div class="model-icon">🔵</div>
+        <div class="card-header-text">
+          <h2>Model A</h2>
+          <p>Flat Royalty — Simple & Transparent</p>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <div class="section-title">Transaction Royalty (% of GMV)</div>
+        <div class="royalty-row">
+          <div class="royalty-label"><div class="level-dot dot-hq"></div>Investra HQ</div>
+          <div class="royalty-value" style="color:#EF4444">2.0%</div>
+        </div>
+        <div class="royalty-row">
+          <div class="royalty-label"><div class="level-dot dot-mf"></div>Master Franchise</div>
+          <div class="royalty-value" style="color:#3B82F6">1.5%</div>
+        </div>
+        <div class="royalty-row">
+          <div class="royalty-label"><div class="level-dot dot-f"></div>Standard Franchise</div>
+          <div class="royalty-value" style="color:#10B981">1.0%</div>
+        </div>
+        <div class="royalty-row" style="border-top:2px solid #E5E7EB; margin-top:4px; padding-top:10px;">
+          <div class="royalty-label" style="font-weight:700">Total Pool</div>
+          <div class="royalty-value">4.5%</div>
+        </div>
+
+        <div class="section-title">Licence Sales Cascade</div>
+        <table class="cascade-table">
+          <tr>
+            <th>Scenario</th><th>HQ</th><th>MF</th><th>F</th><th>Ref</th>
+          </tr>
+          <tr>
+            <td>MF sells direct</td>
+            <td><span class="pct pct-red">70%</span></td>
+            <td><span class="pct pct-blue">15%</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+          </tr>
+          <tr>
+            <td>F sells (under MF)</td>
+            <td><span class="pct pct-red">70%</span></td>
+            <td><span class="pct pct-blue">5%</span></td>
+            <td><span class="pct pct-green">10%</span></td>
+            <td><span class="dash">—</span></td>
+          </tr>
+          <tr>
+            <td>Referral brings lead</td>
+            <td><span class="pct pct-red">65%</span></td>
+            <td><span class="pct pct-blue">5%</span></td>
+            <td><span class="pct pct-green">10%</span></td>
+            <td><span class="pct pct-gold">5%</span></td>
+          </tr>
+          <tr>
+            <td>Recruit new MF/F</td>
+            <td><span class="pct pct-red">85%</span></td>
+            <td><span class="pct pct-blue">15%</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+          </tr>
+        </table>
+
+        <div class="section-title">Advertising, Events & Marketing</div>
+        <table class="cascade-table">
+          <tr><th>Type</th><th>MF</th><th>F</th><th>Ref</th></tr>
+          <tr><td>Ad Credits</td><td><span class="pct pct-blue">15%</span></td><td><span class="pct pct-green">10%</span></td><td><span class="pct pct-gold">3%</span></td></tr>
+          <tr><td>Event Tickets</td><td><span class="pct pct-blue">15%</span></td><td><span class="pct pct-green">10%</span></td><td><span class="pct pct-gold">5%</span></td></tr>
+          <tr><td>Marketing / PR</td><td><span class="pct pct-blue">15%</span></td><td><span class="pct pct-green">10%</span></td><td><span class="pct pct-gold">3%</span></td></tr>
+        </table>
+
+        <div class="highlight-box highlight-a">
+          <strong>✅ Best For:</strong>
+          Phase 1 markets, first-time partners, simple pitch presentations. Easy to explain and understand.
+        </div>
+      </div>
+    </div>
+
+    <!-- MODEL B -->
+    <div class="model-card model-b" id="card-b">
+      <div class="card-header">
+        <div class="model-icon">🟡</div>
+        <div class="card-header-text">
+          <h2>Model B</h2>
+          <p>Tiered Royalty — Performance-Based</p>
+        </div>
+        <div class="recommended-badge">⭐ RECOMMENDED</div>
+      </div>
+      <div class="card-body">
+
+        <div class="section-title">Transaction Royalty — Tiered by Annual GMV</div>
+        <table class="cascade-table">
+          <tr><th>GMV Tier</th><th>HQ</th><th>MF</th><th>F</th><th>Total</th></tr>
+          <tr><td>&lt; €1M</td><td><span class="pct pct-red">2%</span></td><td><span class="pct pct-blue">1%</span></td><td><span class="pct pct-green">0.5%</span></td><td><b>3.5%</b></td></tr>
+          <tr><td>€1M – €5M</td><td><span class="pct pct-red">2%</span></td><td><span class="pct pct-blue">1.5%</span></td><td><span class="pct pct-green">1%</span></td><td><b>4.5%</b></td></tr>
+          <tr><td>€5M – €20M</td><td><span class="pct pct-red">2%</span></td><td><span class="pct pct-blue">2%</span></td><td><span class="pct pct-green">1.5%</span></td><td><b>5.5%</b></td></tr>
+          <tr><td>&gt; €20M</td><td><span class="pct pct-red">2%</span></td><td><span class="pct pct-blue">2.5%</span></td><td><span class="pct pct-green">2%</span></td><td><b>6.5%</b></td></tr>
+        </table>
+
+        <div class="section-title">Licence Sales — Tiered by Active Licences</div>
+        <table class="cascade-table">
+          <tr><th>Active Licences</th><th>MF %</th><th>F %</th><th>Ref %</th></tr>
+          <tr><td>&lt; 50</td><td><span class="pct pct-blue">15%</span></td><td><span class="pct pct-green">8%</span></td><td><span class="pct pct-gold">5%</span></td></tr>
+          <tr><td>50 – 100</td><td><span class="pct pct-blue">18%</span></td><td><span class="pct pct-green">10%</span></td><td><span class="pct pct-gold">5%</span></td></tr>
+          <tr><td>&gt; 100</td><td><span class="pct pct-blue">20%</span></td><td><span class="pct pct-green">12%</span></td><td><span class="pct pct-gold">5%</span></td></tr>
+        </table>
+
+        <div class="section-title">Advertising, Events & Marketing</div>
+        <table class="cascade-table">
+          <tr><th>Type</th><th>MF</th><th>F</th><th>Ref</th></tr>
+          <tr><td>Ad Credits</td><td><span class="pct pct-blue">15–20%</span></td><td><span class="pct pct-green">8–12%</span></td><td><span class="pct pct-gold">3–5%</span></td></tr>
+          <tr><td>Event Tickets</td><td><span class="pct pct-blue">10–15%</span></td><td><span class="pct pct-green">5–10%</span></td><td><span class="pct pct-gold">5%</span></td></tr>
+          <tr><td>Marketing / PR</td><td><span class="pct pct-blue">10–15%</span></td><td><span class="pct pct-green">5–10%</span></td><td><span class="pct pct-gold">3%</span></td></tr>
+          <tr><td>Recruit MF/F</td><td><span class="pct pct-blue">15% + 5% recurring</span></td><td><span class="dash">—</span></td><td><span class="dash">—</span></td></tr>
+        </table>
+
+        <div class="highlight-box highlight-b">
+          <strong>⭐ Best For:</strong>
+          Motivating growth. Partners earn more as they grow. Ideal for scaling markets and long-term franchise relationships.
+        </div>
+      </div>
+    </div>
+
+    <!-- MODEL C -->
+    <div class="model-card model-c" id="card-c">
+      <div class="card-header">
+        <div class="model-icon">🟣</div>
+        <div class="card-header-text">
+          <h2>Model C</h2>
+          <p>Split Pool — Maximum Transparency</p>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <div class="section-title">Transaction Royalty Pool (Total: 5% of GMV)</div>
+        <div class="pool-bar">
+          <div class="pool-bar-track">
+            <div class="pool-seg seg-hq" style="width:40%">HQ 40%</div>
+            <div class="pool-seg seg-mf" style="width:30%">MF 30%</div>
+            <div class="pool-seg seg-f" style="width:20%">F 20%</div>
+            <div class="pool-seg seg-ref" style="width:10%">Ref 10%</div>
+          </div>
+          <div class="pool-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#EF4444"></div>HQ = 2% GMV</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#3B82F6"></div>MF = 1.5% GMV</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>F = 1% GMV</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>Ref = 0.5% GMV</div>
+          </div>
+        </div>
+
+        <div class="section-title">Licence Revenue Pool</div>
+        <div class="pool-bar">
+          <div class="pool-bar-track">
+            <div class="pool-seg seg-hq" style="width:60%">HQ 60%</div>
+            <div class="pool-seg seg-mf" style="width:20%">MF 20%</div>
+            <div class="pool-seg seg-f" style="width:12%">F 12%</div>
+            <div class="pool-seg seg-ref" style="width:8%">Ref 8%</div>
+          </div>
+        </div>
+
+        <div class="section-title">Advertising & Events Pool</div>
+        <table class="cascade-table">
+          <tr><th>Type</th><th>HQ</th><th>MF</th><th>F</th><th>Ref</th></tr>
+          <tr><td>Ad Credits</td><td><span class="pct pct-red">55%</span></td><td><span class="pct pct-blue">20%</span></td><td><span class="pct pct-green">15%</span></td><td><span class="pct pct-gold">10%</span></td></tr>
+          <tr><td>Event Tickets</td><td><span class="pct pct-red">50%</span></td><td><span class="pct pct-blue">25%</span></td><td><span class="pct pct-green">15%</span></td><td><span class="pct pct-gold">10%</span></td></tr>
+          <tr><td>Marketing / PR</td><td><span class="pct pct-red">55%</span></td><td><span class="pct pct-blue">20%</span></td><td><span class="pct pct-green">15%</span></td><td><span class="pct pct-gold">10%</span></td></tr>
+          <tr><td>Recruit MF/F</td><td><span class="pct pct-red">85%</span></td><td><span class="pct pct-blue">15%</span></td><td><span class="dash">—</span></td><td><span class="dash">—</span></td></tr>
+        </table>
+
+        <div class="highlight-box highlight-c">
+          <strong>🔮 Best For:</strong>
+          Investor presentations and legal clarity. Every euro is split by a fixed ratio. No ambiguity, maximum auditability.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end comparison-grid -->
+
+  <!-- FULL COMPARISON TABLE -->
+  <div class="section-header" id="compare">
+    <h2>Full <span class="section-gold">Comparison</span></h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div style="background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.08); margin-bottom:48px;">
+    <table class="full-compare-table" style="width:100%">
+      <thead>
+        <tr>
+          <th class="th-label" style="width:30%">Feature / Criteria</th>
+          <th class="th-a">🔵 Model A<br><small>Flat Royalty</small></th>
+          <th class="th-b">🟡 Model B<br><small>Tiered ⭐</small></th>
+          <th class="th-c">🟣 Model C<br><small>Split Pool</small></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Ease of explanation to partners</td><td><span class="check">✅ Very Easy</span></td><td><span class="partial">⚡ Moderate</span></td><td><span class="partial">⚡ Moderate</span></td></tr>
+        <tr><td>Growth incentive for MF/F</td><td><span class="cross">❌ None</span></td><td><span class="check">✅ Strong</span></td><td><span class="cross">❌ None</span></td></tr>
+        <tr><td>Transparency for investors</td><td><span class="partial">⚡ Good</span></td><td><span class="partial">⚡ Good</span></td><td><span class="check">✅ Maximum</span></td></tr>
+        <tr><td>Referral / Affiliate incentive</td><td><span class="partial">⚡ Basic</span></td><td><span class="check">✅ Strong</span></td><td><span class="check">✅ Fixed pool</span></td></tr>
+        <tr><td>MF earns more as market grows</td><td><span class="cross">❌ No</span></td><td><span class="check">✅ Yes</span></td><td><span class="cross">❌ Fixed %</span></td></tr>
+        <tr><td>Admin complexity</td><td><span class="check">✅ Low</span></td><td><span class="partial">⚡ Medium</span></td><td><span class="check">✅ Low</span></td></tr>
+        <tr><td>Suitable for Phase 1 (Balkans)</td><td><span class="check">✅ Yes</span></td><td><span class="check">✅ Yes</span></td><td><span class="partial">⚡ Partial</span></td></tr>
+        <tr><td>Suitable for Phase 2 (MENA/EU)</td><td><span class="partial">⚡ Partial</span></td><td><span class="check">✅ Yes</span></td><td><span class="check">✅ Yes</span></td></tr>
+        <tr><td>Recruit new MF/F bonus</td><td><span class="check">✅ 15% one-time</span></td><td><span class="check">✅ 15% + 5% recurring</span></td><td><span class="check">✅ 15% one-time</span></td></tr>
+        <tr><td>All % adjustable in Admin</td><td><span class="check">✅ Yes</span></td><td><span class="check">✅ Yes</span></td><td><span class="check">✅ Yes</span></td></tr>
+        <tr><td>Recommended for Investra 2026</td><td><span class="cross">❌</span></td><td><span class="check">✅ YES</span></td><td><span class="cross">❌</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="section-header">
+    <h2>Visual <span class="section-gold">Revenue Split</span> Comparison</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>🔵 Model A — GMV Royalty Split (€1M transaction)</h3>
+      <div style="height:260px"><canvas id="chartA"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>🟡 Model B — Tiered at €5M GMV</h3>
+      <div style="height:260px"><canvas id="chartB"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>🟣 Model C — Pool Split (Licence Revenue)</h3>
+      <div style="height:260px"><canvas id="chartC"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>📊 MF Annual Revenue Comparison (100 transactions × €250k)</h3>
+      <div style="height:260px"><canvas id="chartCompare"></canvas></div>
+    </div>
+  </div>
+
+</div><!-- end container -->
+
+<div class="footer">
+  <p>Investra International Ltd — Business Model Calculator Preview &nbsp;|&nbsp; <a href="#">Master Document</a> &nbsp;|&nbsp; All parameters adjustable in Admin panel</p>
+  <p style="margin-top:8px">© 2026 Investra International Ltd, 128 City Road, London EC1V 2NX</p>
+</div>
+
+<script>
+// ---- TABS & SCROLL ----
+function scrollToModel(id) {
+  const el = document.getElementById('card-' + id) || document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.model-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function setActiveModel(val) {
+  const badge = document.getElementById('activeBadge');
+  const labels = { a: '🔵 Model A Active', b: '⭐ Model B Active', c: '🟣 Model C Active' };
+  const classes = { a: 'badge-a', b: 'badge-b', c: 'badge-c' };
+  badge.textContent = labels[val];
+  badge.className = 'active-model-badge ' + classes[val];
+  // Highlight active card
+  ['a','b','c'].forEach(m => {
+    document.getElementById('card-' + m).style.opacity = (m === val) ? '1' : '0.55';
+    document.getElementById('card-' + m).style.transform = (m === val) ? 'scale(1.02)' : 'scale(1)';
+  });
+}
+// Init highlight
+setActiveModel('b');
+
+// ---- CHARTS ----
+const chartColors = {
+  hq: '#EF4444', mf: '#3B82F6', f: '#10B981', ref: '#F59E0B'
+};
+
+// Chart A — Model A GMV split on €1M
+new Chart(document.getElementById('chartA'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Investra HQ (2%)', 'Master Franchise (1.5%)', 'Standard Franchise (1%)'],
+    datasets: [{
+      data: [20000, 15000, 10000],
+      backgroundColor: [chartColors.hq, chartColors.mf, chartColors.f],
+      borderWidth: 3, borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 } } },
+      tooltip: { callbacks: { label: ctx => ` €${ctx.parsed.toLocaleString()} (${ctx.label})` } }
+    }
+  }
+});
+
+// Chart B — Model B tiered at €5M GMV
+new Chart(document.getElementById('chartB'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Investra HQ (2%)', 'Master Franchise (2%)', 'Standard Franchise (1.5%)'],
+    datasets: [{
+      data: [100000, 100000, 75000],
+      backgroundColor: [chartColors.hq, chartColors.mf, chartColors.f],
+      borderWidth: 3, borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 } } },
+      tooltip: { callbacks: { label: ctx => ` €${ctx.parsed.toLocaleString()} (${ctx.label})` } }
+    }
+  }
+});
+
+// Chart C — Model C pool licence
+new Chart(document.getElementById('chartC'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Investra HQ (60%)', 'Master Franchise (20%)', 'Standard Franchise (12%)', 'Referral (8%)'],
+    datasets: [{
+      data: [60, 20, 12, 8],
+      backgroundColor: [chartColors.hq, chartColors.mf, chartColors.f, chartColors.ref],
+      borderWidth: 3, borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.parsed}% of licence revenue` } }
+    }
+  }
+});
+
+// Chart Compare — MF annual revenue across models (100 tx × €250k = €25M GMV)
+const gmv = 25000000;
+new Chart(document.getElementById('chartCompare'), {
+  type: 'bar',
+  data: {
+    labels: ['Model A\n(Flat 1.5%)', 'Model B\n(Tiered 2%)', 'Model C\n(Pool 1.5%)'],
+    datasets: [{
+      label: 'MF Annual Royalty Revenue (€)',
+      data: [gmv * 0.015, gmv * 0.02, gmv * 0.015],
+      backgroundColor: [chartColors.mf + 'CC', chartColors.ref + 'CC', '#8B5CF6CC'],
+      borderColor: [chartColors.mf, chartColors.ref, '#8B5CF6'],
+      borderWidth: 2, borderRadius: 8
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` €${ctx.parsed.y.toLocaleString()} / year` } }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { callback: v => '€' + (v/1000).toFixed(0) + 'k' }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>

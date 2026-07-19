@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investra Business Model Calculator — Login</title>
+<style>
+:root{--navy:#0A1628;--navy2:#1a2f52;--gold:#C9A84C;--gold-light:#F0D080;--white:#fff;--gray:#6B7280;--border:#E5E7EB;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--navy);min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+/* Background pattern */
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(201,168,76,0.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(26,47,82,0.8) 0%,transparent 50%);pointer-events:none;}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;}
+
+.login-wrap{position:relative;z-index:10;width:100%;max-width:440px;padding:20px;}
+.login-logo{text-align:center;margin-bottom:32px;}
+.login-logo-icon{width:64px;height:64px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:12px;box-shadow:0 8px 32px rgba(201,168,76,0.3);}
+.login-logo-title{color:var(--white);font-size:24px;font-weight:800;letter-spacing:-0.5px;}
+.login-logo-sub{color:var(--gold);font-size:13px;margin-top:4px;font-weight:600;}
+
+.login-card{background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:36px;box-shadow:0 24px 64px rgba(0,0,0,0.4);}
+.login-title{color:var(--white);font-size:20px;font-weight:800;margin-bottom:4px;}
+.login-sub{color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:28px;}
+
+.role-selector{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:24px;}
+.role-btn{padding:12px 8px;border:2px solid rgba(255,255,255,0.1);border-radius:10px;background:transparent;color:rgba(255,255,255,0.6);font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all 0.15s;}
+.role-btn:hover{border-color:rgba(201,168,76,0.5);color:rgba(255,255,255,0.9);}
+.role-btn.active{border-color:var(--gold);background:rgba(201,168,76,0.1);color:var(--gold);}
+.role-icon{font-size:20px;display:block;margin-bottom:4px;}
+
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+.field input{width:100%;padding:12px 16px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--white);font-size:14px;font-weight:600;transition:border-color 0.15s;}
+.field input:focus{outline:none;border-color:var(--gold);background:rgba(255,255,255,0.1);}
+.field input::placeholder{color:rgba(255,255,255,0.3);}
+
+.country-select{display:none;margin-bottom:16px;}
+.country-select.visible{display:block;}
+.country-select label{display:block;font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+.country-select select{width:100%;padding:12px 16px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--white);font-size:14px;font-weight:600;}
+.country-select select option{background:var(--navy);color:var(--white);}
+.country-select select:focus{outline:none;border-color:var(--gold);}
+
+.btn-login{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);font-size:15px;font-weight:800;border:none;border-radius:10px;cursor:pointer;margin-top:8px;transition:all 0.15s;box-shadow:0 4px 16px rgba(201,168,76,0.3);}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,0.4);}
+.btn-login:active{transform:translateY(0);}
+
+.error-msg{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 14px;color:#FCA5A5;font-size:13px;margin-top:12px;display:none;}
+
+.partner-link{text-align:center;margin-top:20px;}
+.partner-link a{color:rgba(255,255,255,0.4);font-size:12px;text-decoration:none;}
+.partner-link a:hover{color:var(--gold);}
+
+.demo-hint{background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:12px 14px;margin-top:16px;}
+.demo-hint p{color:rgba(255,255,255,0.6);font-size:11px;line-height:1.6;}
+.demo-hint strong{color:var(--gold);}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="login-wrap">
+  <div class="login-logo">
+    <div class="login-logo-icon">🏢</div>
+    <div class="login-logo-title">Investra BM Calculator</div>
+    <div class="login-logo-sub">Business Model & Financial Projections</div>
+  </div>
+
+  <div class="login-card">
+    <div class="login-title">Welcome back</div>
+    <div class="login-sub">Select your role and enter your access code</div>
+
+    <div class="role-selector">
+      <button class="role-btn active" onclick="selectRole('admin',this)">
+        <span class="role-icon">🏛️</span>Admin HQ
+      </button>
+      <button class="role-btn" onclick="selectRole('mf',this)">
+        <span class="role-icon">🏆</span>Master Franchise
+      </button>
+      <button class="role-btn" onclick="selectRole('f',this)">
+        <span class="role-icon">🏪</span>Franchise
+      </button>
+    </div>
+
+    <div class="country-select" id="mf_country">
+      <label>Select Country</label>
+      <select id="mf_country_sel">
+        <option value="si">🇸🇮 Slovenia</option>
+        <option value="hr">🇭🇷 Croatia</option>
+        <option value="rs">🇷🇸 Serbia</option>
+        <option value="ba">🇧🇦 Bosnia & Herzegovina</option>
+        <option value="cy">🇨🇾 TRNC / Cyprus</option>
+        <option value="tr">🇹🇷 Turkey</option>
+        <option value="de">🇩🇪 Germany</option>
+      </select>
+    </div>
+
+    <div class="country-select" id="f_country">
+      <label>Select Country</label>
+      <select id="f_country_sel">
+        <option value="si">🇸🇮 Slovenia</option>
+        <option value="hr">🇭🇷 Croatia</option>
+        <option value="rs">🇷🇸 Serbia</option>
+        <option value="ba">🇧🇦 Bosnia & Herzegovina</option>
+        <option value="cy">🇨🇾 TRNC / Cyprus</option>
+        <option value="tr">🇹🇷 Turkey</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Access Code</label>
+      <input type="password" id="passcode" placeholder="Enter your access code" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+
+    <button class="btn-login" onclick="doLogin()">🔐 Access Dashboard</button>
+    <div class="error-msg" id="errorMsg">❌ Invalid access code. Please try again.</div>
+
+    <div class="demo-hint">
+      <p><strong>Demo Access Codes:</strong><br>
+      Admin HQ: <strong>InvestraHQ2026</strong><br>
+      Master Franchise: <strong>InvestraMF2026</strong><br>
+      Franchise: <strong>InvestraF2026</strong></p>
+    </div>
+  </div>
+
+  <div class="partner-link">
+    <a href="partner.html">🔗 Partner / Prospect Access (No login required)</a>
+  </div>
+</div>
+
+<script>
+let currentRole = 'admin';
+function selectRole(role, btn) {
+  currentRole = role;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('mf_country').classList.toggle('visible', role === 'mf');
+  document.getElementById('f_country').classList.toggle('visible', role === 'f');
+}
+function doLogin() {
+  const code = document.getElementById('passcode').value.trim();
+  const codes = { admin: 'InvestraHQ2026', mf: 'InvestraMF2026', f: 'InvestraF2026' };
+  if (code === codes[currentRole]) {
+    const country = currentRole === 'mf' ? document.getElementById('mf_country_sel').value :
+                    currentRole === 'f'  ? document.getElementById('f_country_sel').value : 'all';
+    sessionStorage.setItem('inv_role', currentRole);
+    sessionStorage.setItem('inv_country', country);
+    if (currentRole === 'admin') window.location.href = 'admin.html';
+    else window.location.href = 'calculator.html';
+  } else {
+    document.getElementById('errorMsg').style.display = 'block';
+    setTimeout(() => document.getElementById('errorMsg').style.display = 'none', 3000);
+  }
+}
+</script>
+</body>
+</html>

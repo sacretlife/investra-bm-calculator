@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investra — Financial Projections Calculator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--navy:#0A1628;--navy2:#1a2f52;--gold:#C9A84C;--gold-light:#F0D080;--white:#fff;--gray-bg:#F5F6FA;--gray:#6B7280;--border:#E5E7EB;--green:#10B981;--blue:#3B82F6;--red:#EF4444;--purple:#8B5CF6;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);color:var(--navy);}
+.app{display:flex;min-height:100vh;}
+.sidebar{width:260px;background:var(--navy);flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.main{flex:1;overflow-x:hidden;}
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid rgba(255,255,255,0.1);}
+.sidebar-logo-row{display:flex;align-items:center;gap:10px;}
+.sidebar-logo-icon{width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.sidebar-logo-text{color:var(--white);font-size:15px;font-weight:700;}
+.sidebar-logo-sub{color:var(--gold);font-size:11px;margin-top:2px;}
+.role-badge{margin-top:12px;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;text-align:center;}
+.role-badge.admin{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#FCA5A5;}
+.role-badge.mf{background:rgba(201,168,76,0.15);border:1px solid var(--gold);color:var(--gold);}
+.role-badge.f{background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#93C5FD;}
+.nav-section{padding:16px 12px 8px;color:rgba(255,255,255,0.4);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;color:rgba(255,255,255,0.7);font-size:13px;cursor:pointer;border-radius:8px;margin:2px 8px;transition:all 0.15s;}
+.nav-item:hover{background:rgba(255,255,255,0.08);color:var(--white);}
+.nav-item.active{background:var(--gold);color:var(--navy);font-weight:700;}
+.nav-icon{font-size:16px;width:20px;text-align:center;}
+.topbar{background:var(--white);border-bottom:2px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-title{font-size:20px;font-weight:800;}
+.topbar-title span{color:var(--gold);}
+.topbar-right{display:flex;gap:10px;align-items:center;}
+.btn{padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all 0.15s;}
+.btn-gold{background:var(--gold);color:var(--navy);}
+.btn-outline{background:transparent;border:2px solid var(--border);color:var(--navy);}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+.content{padding:32px;}
+
+/* INPUT PANEL */
+.input-panel{background:var(--white);border-radius:16px;padding:28px;margin-bottom:24px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.panel-title{font-size:16px;font-weight:800;margin-bottom:4px;}
+.panel-sub{font-size:13px;color:var(--gray);margin-bottom:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;}
+@media(max-width:900px){.grid-3,.grid-4{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;}
+.field input,.field select{padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;background:var(--white);transition:border-color 0.15s;}
+.field input:focus,.field select:focus{outline:none;border-color:var(--gold);}
+.field .hint{font-size:11px;color:var(--gray);}
+.range-wrap{display:flex;align-items:center;gap:12px;}
+.range-wrap input[type=range]{flex:1;accent-color:var(--gold);}
+.range-val{font-weight:700;font-size:14px;min-width:52px;text-align:right;color:var(--gold);}
+.divider{height:1px;background:var(--border);margin:20px 0;}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+@media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+.kpi-card{background:var(--white);border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-top:4px solid transparent;}
+.kpi-card.gold{border-top-color:var(--gold);}
+.kpi-card.green{border-top-color:var(--green);}
+.kpi-card.blue{border-top-color:var(--blue);}
+.kpi-card.purple{border-top-color:var(--purple);}
+.kpi-label{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+.kpi-value{font-size:28px;font-weight:900;line-height:1;}
+.kpi-sub{font-size:12px;color:var(--gray);margin-top:6px;}
+.kpi-trend{font-size:12px;font-weight:700;margin-top:4px;}
+.kpi-trend.up{color:var(--green);}
+.kpi-trend.down{color:var(--red);}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}
+@media(max-width:900px){.charts-grid{grid-template-columns:1fr;}}
+.chart-card{background:var(--white);border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.chart-title{font-size:15px;font-weight:800;margin-bottom:4px;}
+.chart-sub{font-size:12px;color:var(--gray);margin-bottom:16px;}
+.chart-wrap{height:280px;position:relative;}
+
+/* BREAKDOWN TABLE */
+.breakdown-card{background:var(--white);border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:24px;}
+.breakdown-table{width:100%;border-collapse:collapse;font-size:13px;}
+.breakdown-table th{background:var(--navy);color:var(--white);padding:10px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:0.5px;}
+.breakdown-table td{padding:10px 14px;border-bottom:1px solid var(--border);}
+.breakdown-table tr:last-child td{border-bottom:none;font-weight:800;background:#FFFBEB;}
+.breakdown-table tr:nth-child(even) td{background:#F9FAFB;}
+.amount-cell{font-weight:700;color:var(--navy);}
+.pct-cell{color:var(--gold);font-weight:700;}
+.hq-row td{color:var(--gray);}
+
+/* VIEW TOGGLE */
+.view-toggle{display:flex;gap:8px;background:#F3F4F6;border-radius:10px;padding:4px;}
+.view-btn{padding:7px 16px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--gray);transition:all 0.15s;}
+.view-btn.active{background:var(--white);color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+
+/* PROJECTION HORIZON */
+.horizon-toggle{display:flex;gap:8px;}
+.horizon-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid var(--border);background:transparent;color:var(--gray);transition:all 0.15s;}
+.horizon-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.05);}
+
+/* ROLE NOTICE */
+.role-notice{background:#FFFBEB;border:1px solid var(--gold);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;display:flex;align-items:center;gap:10px;}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-row">
+      <div class="sidebar-logo-icon">📊</div>
+      <div>
+        <div class="sidebar-logo-text">BM Calculator</div>
+        <div class="sidebar-logo-sub" id="sidebar_country">Loading...</div>
+      </div>
+    </div>
+    <div class="role-badge mf" id="role_badge">Master Franchise</div>
+  </div>
+  <div class="nav-section">Calculator</div>
+  <div class="nav-item active"><span class="nav-icon">📊</span>Financial Projections</div>
+  <div class="nav-item" onclick="window.location='partner.html'"><span class="nav-icon">🔗</span>Partner View</div>
+  <div class="nav-section">Navigation</div>
+  <div class="nav-item" id="admin_link" onclick="window.location='admin.html'" style="display:none"><span class="nav-icon">⚙️</span>Admin Settings</div>
+  <div class="nav-item" onclick="window.location='model-preview.html'"><span class="nav-icon">👁️</span>Model Preview</div>
+  <div class="nav-item" onclick="window.location='index.html'"><span class="nav-icon">🚪</span>Logout</div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Financial <span>Projections</span></div>
+    <div class="topbar-right">
+      <div class="view-toggle">
+        <button class="view-btn active" onclick="setView('mf',this)">MF View</button>
+        <button class="view-btn" onclick="setView('f',this)" id="f_view_btn">F View</button>
+        <button class="view-btn" onclick="setView('full',this)" id="full_view_btn">Full Cascade</button>
+      </div>
+      <div class="horizon-toggle">
+        <button class="horizon-btn active" onclick="setHorizon(12,this)">12M</button>
+        <button class="horizon-btn" onclick="setHorizon(36,this)">3Y</button>
+        <button class="horizon-btn" onclick="setHorizon(60,this)">5Y</button>
+      </div>
+      <button class="btn btn-gold" onclick="window.print()">📄 Export PDF</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="role-notice" id="role_notice">
+      🏆 <span id="role_notice_text">Viewing as: <strong>Master Franchise</strong></span>
+    </div>
+
+    <!-- INPUT PANEL -->
+    <div class="input-panel">
+      <div class="panel-title">⚙️ Input Parameters</div>
+      <div class="panel-sub">Adjust any parameter and all projections update instantly.</div>
+
+      <div class="grid-4">
+        <div class="field">
+          <label>Country</label>
+          <select id="inp_country" onchange="recalc()">
+            <option value="si">🇸🇮 Slovenia</option>
+            <option value="hr">🇭🇷 Croatia</option>
+            <option value="rs">🇷🇸 Serbia</option>
+            <option value="ba">🇧🇦 BiH</option>
+            <option value="cy">🇨🇾 TRNC</option>
+            <option value="tr">🇹🇷 Turkey</option>
+            <option value="de">🇩🇪 Germany</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Avg. Property Value (€)</label>
+          <input type="number" id="inp_prop_val" value="250000" min="10000" step="5000" oninput="recalc()">
+        </div>
+        <div class="field">
+          <label>Avg. Commission %</label>
+          <div class="range-wrap">
+            <input type="range" id="inp_commission" min="0.5" max="10" step="0.1" value="2" oninput="document.getElementById('inp_comm_val').textContent=this.value+'%';recalc()">
+            <span class="range-val" id="inp_comm_val">2%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Growth Rate / Year %</label>
+          <div class="range-wrap">
+            <input type="range" id="inp_growth" min="0" max="100" step="5" value="20" oninput="document.getElementById('inp_growth_val').textContent=this.value+'%';recalc()">
+            <span class="range-val" id="inp_growth_val">20%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="grid-4">
+        <div class="field">
+          <label>Active Agents</label>
+          <input type="number" id="inp_agents" value="50" min="0" oninput="recalc()">
+          <div class="hint">Avg. package: Agent P2 (€99/mo)</div>
+        </div>
+        <div class="field">
+          <label>Active Agencies</label>
+          <input type="number" id="inp_agencies" value="10" min="0" oninput="recalc()">
+          <div class="hint">Avg. package: Agency P1 (€199/mo)</div>
+        </div>
+        <div class="field">
+          <label>Active Developers</label>
+          <input type="number" id="inp_devs" value="5" min="0" oninput="recalc()">
+          <div class="hint">Avg. package: Developer P1 (€299/mo)</div>
+        </div>
+        <div class="field">
+          <label>Active Clients (VIP)</label>
+          <input type="number" id="inp_clients" value="100" min="0" oninput="recalc()">
+          <div class="hint">VIP package: €50/mo</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="grid-4">
+        <div class="field">
+          <label>Transactions / Month</label>
+          <input type="number" id="inp_transactions" value="8" min="0" oninput="recalc()">
+        </div>
+        <div class="field">
+          <label>Ad Credits Revenue / Mo (€)</label>
+          <input type="number" id="inp_ads" value="2000" min="0" oninput="recalc()">
+        </div>
+        <div class="field">
+          <label>Events Revenue / Mo (€)</label>
+          <input type="number" id="inp_events" value="500" min="0" oninput="recalc()">
+        </div>
+        <div class="field">
+          <label>Standard Franchises Sold</label>
+          <input type="number" id="inp_f_sold" value="3" min="0" oninput="recalc()">
+          <div class="hint">Avg. Tier C setup €4,900</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card gold">
+        <div class="kpi-label">MF Monthly Revenue</div>
+        <div class="kpi-value" id="kpi_monthly">€0</div>
+        <div class="kpi-sub">All revenue streams combined</div>
+        <div class="kpi-trend up" id="kpi_monthly_trend">↑ Growing</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">MF Annual Revenue</div>
+        <div class="kpi-value" id="kpi_annual">€0</div>
+        <div class="kpi-sub">12-month projection</div>
+        <div class="kpi-trend up" id="kpi_annual_trend">↑ +20% YoY</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label">GMV (Monthly)</div>
+        <div class="kpi-value" id="kpi_gmv">€0</div>
+        <div class="kpi-sub">Gross Merchandise Value</div>
+        <div class="kpi-trend up">↑ Transaction volume</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-label">Break-Even Month</div>
+        <div class="kpi-value" id="kpi_breakeven">M6</div>
+        <div class="kpi-sub">Based on MF licence cost</div>
+        <div class="kpi-trend up">✅ On track</div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">📈 Revenue Growth Projection</div>
+        <div class="chart-sub">Monthly revenue over selected horizon (Model B — Tiered)</div>
+        <div class="chart-wrap"><canvas id="chart_growth"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">🥧 Revenue Stream Breakdown</div>
+        <div class="chart-sub">Monthly revenue by source</div>
+        <div class="chart-wrap"><canvas id="chart_breakdown"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">💰 Cumulative Revenue vs. Investment</div>
+        <div class="chart-sub">Break-even analysis over time</div>
+        <div class="chart-wrap"><canvas id="chart_breakeven"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">📊 Annual Revenue Comparison (3Y)</div>
+        <div class="chart-sub">Year 1 vs Year 2 vs Year 3</div>
+        <div class="chart-wrap"><canvas id="chart_annual"></canvas></div>
+      </div>
+    </div>
+
+    <!-- BREAKDOWN TABLE -->
+    <div class="breakdown-card">
+      <div class="chart-title" style="margin-bottom:4px">🔍 Full Revenue Breakdown</div>
+      <div class="chart-sub" style="margin-bottom:16px">Monthly revenue by stream with cascade distribution</div>
+      <table class="breakdown-table">
+        <thead>
+          <tr>
+            <th>Revenue Stream</th>
+            <th>Gross (€)</th>
+            <th>HQ % / Amount</th>
+            <th id="mf_col_header">MF % / Amount</th>
+            <th id="f_col_header">F % / Amount</th>
+            <th>Your Share (€)</th>
+          </tr>
+        </thead>
+        <tbody id="breakdown_body"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+// ---- SETTINGS (Model B defaults — synced with Admin) ----
+const S = {
+  gmv_tiers: [
+    {max:1e6,   hq:2,   mf:1,   f:0.5},
+    {max:5e6,   hq:2,   mf:1.5, f:1  },
+    {max:20e6,  hq:2,   mf:2,   f:1.5},
+    {max:Infinity,hq:2, mf:2.5, f:2  }
+  ],
+  lic_tiers: [
+    {max:50,  mf:15, f:8,  ref:5},
+    {max:100, mf:18, f:10, ref:5},
+    {max:Infinity, mf:20, f:12, ref:5}
+  ],
+  ads_mf: 15, ads_f: 8,
+  evt_mf: 12, evt_f: 6,
+  agent_avg: 99, agency_avg: 199, dev_avg: 299, client_vip: 50,
+  f_setup_avg: 4900, f_monthly_avg: 449,
+  mf_annual: 50000, mf_monthly: 2000,
+};
+
+let currentView = 'mf';
+let currentHorizon = 12;
+let charts = {};
+
+function getGMVTier(gmv) {
+  return S.gmv_tiers.find(t => gmv <= t.max) || S.gmv_tiers[S.gmv_tiers.length-1];
+}
+function getLicTier(total_lic) {
+  return S.lic_tiers.find(t => total_lic <= t.max) || S.lic_tiers[S.lic_tiers.length-1];
+}
+
+function recalc() {
+  const propVal = parseFloat(document.getElementById('inp_prop_val').value)||250000;
+  const commPct = parseFloat(document.getElementById('inp_commission').value)||2;
+  const agents  = parseInt(document.getElementById('inp_agents').value)||0;
+  const agencies= parseInt(document.getElementById('inp_agencies').value)||0;
+  const devs    = parseInt(document.getElementById('inp_devs').value)||0;
+  const clients = parseInt(document.getElementById('inp_clients').value)||0;
+  const txns    = parseInt(document.getElementById('inp_transactions').value)||0;
+  const ads     = parseFloat(document.getElementById('inp_ads').value)||0;
+  const events  = parseFloat(document.getElementById('inp_events').value)||0;
+  const f_sold  = parseInt(document.getElementById('inp_f_sold').value)||0;
+  const growth  = parseFloat(document.getElementById('inp_growth').value)||20;
+
+  // GMV
+  const monthly_gmv = txns * propVal;
+  const annual_gmv  = monthly_gmv * 12;
+  const gmv_tier    = getGMVTier(annual_gmv);
+
+  // Royalty
+  const royalty_gross = monthly_gmv * commPct / 100;
+  const royalty_mf    = royalty_gross * gmv_tier.mf / 100;
+  const royalty_f     = royalty_gross * gmv_tier.f  / 100;
+  const royalty_hq    = royalty_gross * gmv_tier.hq / 100;
+
+  // Licence SaaS
+  const total_lic = agents + agencies + devs;
+  const lic_tier  = getLicTier(total_lic);
+  const lic_gross = agents*S.agent_avg + agencies*S.agency_avg + devs*S.dev_avg + clients*S.client_vip;
+  const lic_mf    = lic_gross * lic_tier.mf / 100;
+  const lic_f     = lic_gross * lic_tier.f  / 100;
+  const lic_hq    = lic_gross * (100 - lic_tier.mf - lic_tier.f - lic_tier.ref) / 100;
+
+  // Ads
+  const ads_mf = ads * S.ads_mf / 100;
+  const ads_f  = ads * S.ads_f  / 100;
+  const ads_hq = ads - ads_mf - ads_f;
+
+  // Events
+  const evt_mf = events * S.evt_mf / 100;
+  const evt_f  = events * S.evt_f  / 100;
+  const evt_hq = events - evt_mf - evt_f;
+
+  // F Licence (MF gets % of F setup fees)
+  const f_setup_monthly = f_sold * S.f_setup_avg / 12; // amortized
+  const f_saas_monthly  = f_sold * S.f_monthly_avg;
+  const f_rev_mf        = (f_setup_monthly + f_saas_monthly) * lic_tier.mf / 100;
+
+  // TOTALS
+  const mf_monthly = royalty_mf + lic_mf + ads_mf + evt_mf + f_rev_mf;
+  const mf_annual  = mf_monthly * 12;
+  const f_monthly  = royalty_f  + lic_f  + ads_f  + evt_f;
+
+  // KPIs
+  document.getElementById('kpi_monthly').textContent = '€' + Math.round(mf_monthly).toLocaleString();
+  document.getElementById('kpi_annual').textContent  = '€' + Math.round(mf_annual).toLocaleString();
+  document.getElementById('kpi_gmv').textContent     = '€' + Math.round(monthly_gmv).toLocaleString();
+  document.getElementById('kpi_annual_trend').textContent = '↑ +' + growth + '% YoY';
+
+  // Break-even
+  const mf_cost = S.mf_annual + S.mf_monthly * 12;
+  const be_month = mf_monthly > 0 ? Math.ceil(mf_cost / mf_monthly) : 99;
+  document.getElementById('kpi_breakeven').textContent = be_month <= 60 ? 'M' + be_month : '60M+';
+
+  // Breakdown table
+  const rows = [
+    {label:'Transaction Royalties', gross:royalty_gross, hq_pct:gmv_tier.hq, hq:royalty_hq, mf_pct:gmv_tier.mf, mf:royalty_mf, f_pct:gmv_tier.f, f:royalty_f},
+    {label:'SaaS Licences', gross:lic_gross, hq_pct:100-lic_tier.mf-lic_tier.f-lic_tier.ref, hq:lic_hq, mf_pct:lic_tier.mf, mf:lic_mf, f_pct:lic_tier.f, f:lic_f},
+    {label:'Advertising Credits', gross:ads, hq_pct:100-S.ads_mf-S.ads_f, hq:ads_hq, mf_pct:S.ads_mf, mf:ads_mf, f_pct:S.ads_f, f:ads_f},
+    {label:'Events & Tickets', gross:events, hq_pct:100-S.evt_mf-S.evt_f, hq:evt_hq, mf_pct:S.evt_mf, mf:evt_mf, f_pct:S.evt_f, f:evt_f},
+    {label:'F Licence Revenue (MF share)', gross:f_setup_monthly+f_saas_monthly, hq_pct:0, hq:0, mf_pct:lic_tier.mf, mf:f_rev_mf, f_pct:0, f:0},
+  ];
+  const total_gross = rows.reduce((s,r)=>s+r.gross,0);
+  const total_mf    = rows.reduce((s,r)=>s+r.mf,0);
+  const total_f     = rows.reduce((s,r)=>s+r.f,0);
+  const total_hq    = rows.reduce((s,r)=>s+r.hq,0);
+
+  const tbody = document.getElementById('breakdown_body');
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.label}</td>
+      <td class="amount-cell">€${Math.round(r.gross).toLocaleString()}</td>
+      <td class="hq-row"><span class="pct-cell">${r.hq_pct}%</span> = €${Math.round(r.hq).toLocaleString()}</td>
+      <td><span class="pct-cell">${r.mf_pct}%</span> = <b>€${Math.round(r.mf).toLocaleString()}</b></td>
+      <td><span class="pct-cell">${r.f_pct}%</span> = €${Math.round(r.f).toLocaleString()}</td>
+      <td style="font-weight:900;color:var(--gold)">€${Math.round(currentView==='f'?r.f:r.mf).toLocaleString()}</td>
+    </tr>
+  `).join('') + `
+    <tr>
+      <td><b>TOTAL MONTHLY</b></td>
+      <td class="amount-cell"><b>€${Math.round(total_gross).toLocaleString()}</b></td>
+      <td class="hq-row"><b>€${Math.round(total_hq).toLocaleString()}</b></td>
+      <td><b>€${Math.round(total_mf).toLocaleString()}</b></td>
+      <td><b>€${Math.round(total_f).toLocaleString()}</b></td>
+      <td style="font-weight:900;font-size:16px;color:var(--gold)">€${Math.round(currentView==='f'?total_f:total_mf).toLocaleString()}</td>
+    </tr>`;
+
+  // Charts
+  updateCharts(mf_monthly, mf_annual, growth, be_month, mf_cost, {
+    royalty: royalty_mf, saas: lic_mf, ads: ads_mf, events: evt_mf, f_rev: f_rev_mf
+  });
+}
+
+function updateCharts(monthly, annual, growthPct, be_month, mf_cost, streams) {
+  const months = currentHorizon;
+  const labels = Array.from({length:months}, (_,i) => {
+    const d = new Date(); d.setMonth(d.getMonth()+i);
+    return d.toLocaleString('en',{month:'short',year:'2-digit'});
+  });
+
+  // Growth projection
+  const growthData = Array.from({length:months}, (_,i) => {
+    const yr = Math.floor(i/12);
+    return Math.round(monthly * Math.pow(1 + growthPct/100, yr));
+  });
+
+  if (charts.growth) charts.growth.destroy();
+  charts.growth = new Chart(document.getElementById('chart_growth'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Monthly Revenue (€)',
+        data: growthData,
+        borderColor: '#C9A84C',
+        backgroundColor: 'rgba(201,168,76,0.1)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: '#C9A84C'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {legend:{display:false}},
+      scales: {
+        y: {ticks:{callback:v=>'€'+v.toLocaleString()}, grid:{color:'rgba(0,0,0,0.05)'}},
+        x: {grid:{display:false}}
+      }
+    }
+  });
+
+  // Breakdown pie
+  if (charts.breakdown) charts.breakdown.destroy();
+  charts.breakdown = new Chart(document.getElementById('chart_breakdown'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Royalties','SaaS Licences','Advertising','Events','F Licences'],
+      datasets: [{
+        data: [streams.royalty, streams.saas, streams.ads, streams.events, streams.f_rev].map(v=>Math.max(0,Math.round(v))),
+        backgroundColor: ['#C9A84C','#10B981','#3B82F6','#8B5CF6','#F59E0B'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {legend:{position:'bottom', labels:{font:{size:11}}}}
+    }
+  });
+
+  // Break-even
+  const cumRevenue = [];
+  const cumCost = [];
+  let cum = 0;
+  for (let i=0; i<months; i++) {
+    const yr = Math.floor(i/12);
+    cum += monthly * Math.pow(1 + growthPct/100, yr);
+    cumRevenue.push(Math.round(cum));
+    cumCost.push(Math.round(mf_cost * (1 + i/12)));
+  }
+  if (charts.breakeven) charts.breakeven.destroy();
+  charts.breakeven = new Chart(document.getElementById('chart_breakeven'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {label:'Cumulative Revenue',data:cumRevenue,borderColor:'#10B981',backgroundColor:'rgba(16,185,129,0.1)',fill:true,tension:0.4},
+        {label:'Cumulative Cost',data:cumCost,borderColor:'#EF4444',backgroundColor:'rgba(239,68,68,0.05)',fill:true,tension:0.1,borderDash:[5,5]}
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
+      scales:{y:{ticks:{callback:v=>'€'+v.toLocaleString()},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}
+    }
+  });
+
+  // Annual comparison
+  const growthFactor = 1 + growthPct/100;
+  if (charts.annual) charts.annual.destroy();
+  charts.annual = new Chart(document.getElementById('chart_annual'), {
+    type: 'bar',
+    data: {
+      labels: ['Year 1','Year 2','Year 3'],
+      datasets: [{
+        label: 'Annual Revenue (€)',
+        data: [Math.round(annual), Math.round(annual*growthFactor), Math.round(annual*growthFactor*growthFactor)],
+        backgroundColor: ['#C9A84C','#F0D080','#10B981'],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback:v=>'€'+v.toLocaleString()},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}
+    }
+  });
+}
+
+function setView(view, btn) {
+  currentView = view;
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  recalc();
+}
+function setHorizon(months, btn) {
+  currentHorizon = months;
+  document.querySelectorAll('.horizon-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  recalc();
+}
+
+// Init
+window.onload = () => {
+  const role = sessionStorage.getItem('inv_role') || 'mf';
+  const country = sessionStorage.getItem('inv_country') || 'si';
+  const countryNames = {si:'Slovenia',hr:'Croatia',rs:'Serbia',ba:'BiH',cy:'TRNC',tr:'Turkey',de:'Germany'};
+  document.getElementById('sidebar_country').textContent = countryNames[country] || country;
+  document.getElementById('role_badge').textContent = role === 'admin' ? '🏛️ Admin HQ' : role === 'mf' ? '🏆 Master Franchise' : '🏪 Franchise';
+  document.getElementById('role_notice_text').innerHTML = `Viewing as: <strong>${role === 'admin' ? 'Admin HQ' : role === 'mf' ? 'Master Franchise — ' + countryNames[country] : 'Franchise — ' + countryNames[country]}</strong>`;
+  if (role === 'admin') document.getElementById('admin_link').style.display = 'flex';
+  if (role === 'f') { document.getElementById('f_view_btn').click(); }
+  try { document.getElementById('inp_country').value = country; } catch(e){}
+  recalc();
+};
+</script>
+</body>
+</html>

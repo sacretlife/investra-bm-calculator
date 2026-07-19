@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investra BM Calculator — Admin Settings</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  --navy:#0A1628; --navy2:#1a2f52; --gold:#C9A84C; --gold-light:#F0D080;
+  --white:#fff; --gray-bg:#F5F6FA; --gray:#6B7280; --border:#E5E7EB;
+  --green:#10B981; --blue:#3B82F6; --red:#EF4444; --purple:#8B5CF6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);color:var(--navy);}
+
+/* LAYOUT */
+.app{display:flex;min-height:100vh;}
+.sidebar{width:260px;background:var(--navy);flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.main{flex:1;overflow-x:hidden;}
+
+/* SIDEBAR */
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid rgba(255,255,255,0.1);}
+.sidebar-logo-row{display:flex;align-items:center;gap:10px;}
+.sidebar-logo-icon{width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.sidebar-logo-text{color:var(--white);font-size:15px;font-weight:700;}
+.sidebar-logo-sub{color:var(--gold);font-size:11px;margin-top:2px;}
+.sidebar-badge{margin-top:12px;background:rgba(201,168,76,0.15);border:1px solid var(--gold);border-radius:6px;padding:6px 10px;color:var(--gold);font-size:11px;font-weight:700;text-align:center;}
+
+.nav-section{padding:16px 12px 8px;color:rgba(255,255,255,0.4);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;color:rgba(255,255,255,0.7);font-size:13px;cursor:pointer;border-radius:8px;margin:2px 8px;transition:all 0.15s;}
+.nav-item:hover{background:rgba(255,255,255,0.08);color:var(--white);}
+.nav-item.active{background:var(--gold);color:var(--navy);font-weight:700;}
+.nav-icon{font-size:16px;width:20px;text-align:center;}
+
+/* TOPBAR */
+.topbar{background:var(--white);border-bottom:2px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-title{font-size:20px;font-weight:800;}
+.topbar-title span{color:var(--gold);}
+.topbar-actions{display:flex;gap:10px;align-items:center;}
+.btn{padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all 0.15s;}
+.btn-gold{background:var(--gold);color:var(--navy);}
+.btn-gold:hover{background:var(--gold-light);}
+.btn-outline{background:transparent;border:2px solid var(--border);color:var(--navy);}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+.btn-green{background:var(--green);color:var(--white);}
+.btn-red{background:var(--red);color:var(--white);}
+.saved-badge{background:#D1FAE5;color:#065F46;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;display:none;}
+
+/* CONTENT */
+.content{padding:32px;}
+.section{background:var(--white);border-radius:16px;padding:28px;margin-bottom:24px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.section-title{font-size:16px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.section-subtitle{font-size:13px;color:var(--gray);margin-bottom:20px;}
+.section-divider{height:1px;background:var(--border);margin:20px 0;}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;}
+@media(max-width:900px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+/* FIELD */
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;}
+.field input,.field select{padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;background:var(--white);transition:border-color 0.15s;}
+.field input:focus,.field select:focus{outline:none;border-color:var(--gold);}
+.field .hint{font-size:11px;color:var(--gray);}
+.field .calc-display{font-size:12px;color:var(--green);font-weight:700;margin-top:2px;}
+
+/* RANGE SLIDER */
+.range-wrap{display:flex;align-items:center;gap:12px;}
+.range-wrap input[type=range]{flex:1;accent-color:var(--gold);}
+.range-val{font-weight:700;font-size:14px;min-width:48px;text-align:right;}
+
+/* TABLE */
+.settings-table{width:100%;border-collapse:collapse;font-size:13px;}
+.settings-table th{background:var(--navy);color:var(--white);padding:10px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:0.5px;}
+.settings-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.settings-table tr:last-child td{border-bottom:none;}
+.settings-table tr:nth-child(even) td{background:#F9FAFB;}
+.settings-table input{padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-weight:600;width:90px;text-align:center;}
+.settings-table input:focus{outline:none;border-color:var(--gold);}
+.euro-display{font-size:11px;color:var(--green);font-weight:700;}
+
+/* PACKAGE CARD */
+.pkg-card{border:2px solid var(--border);border-radius:12px;padding:16px;position:relative;}
+.pkg-card.featured{border-color:var(--gold);}
+.pkg-badge{position:absolute;top:-10px;right:12px;background:var(--gold);color:var(--navy);font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;}
+.pkg-title{font-size:14px;font-weight:800;margin-bottom:12px;}
+.pkg-field{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;}
+.pkg-field label{color:var(--gray);}
+.pkg-field input{width:80px;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-weight:600;text-align:center;}
+.pkg-field input:focus{outline:none;border-color:var(--gold);}
+
+/* COUNTRY TABLE */
+.country-row td:first-child{font-weight:700;}
+.multiplier-cell{color:var(--blue);font-weight:700;}
+.auto-calc{color:var(--green);font-size:12px;}
+
+/* CREDIT SYSTEM */
+.credit-info{background:#FFFBEB;border:1px solid var(--gold);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px;}
+.credit-info strong{color:var(--gold);}
+.custom-credit-calc{background:#F0F9FF;border:1px solid var(--blue);border-radius:10px;padding:16px;margin-top:16px;}
+.custom-credit-calc h4{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--blue);}
+
+/* TABS */
+.tab-bar{display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:0;}
+.tab-btn{padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--gray);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.15s;}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* TOGGLE */
+.toggle-wrap{display:flex;align-items:center;gap:10px;font-size:13px;}
+.toggle{width:44px;height:24px;background:var(--border);border-radius:12px;position:relative;cursor:pointer;transition:background 0.2s;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;background:var(--white);border-radius:50%;top:3px;left:3px;transition:left 0.2s;}
+.toggle.on::after{left:23px;}
+
+/* ADD ROW */
+.add-row-btn{display:flex;align-items:center;gap:8px;padding:10px 16px;border:2px dashed var(--border);border-radius:8px;cursor:pointer;font-size:13px;color:var(--gray);font-weight:600;width:100%;background:transparent;margin-top:8px;}
+.add-row-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* STATUS BAR */
+.status-bar{background:var(--navy);color:rgba(255,255,255,0.6);padding:10px 32px;font-size:12px;display:flex;justify-content:space-between;}
+.status-bar span{color:var(--gold);}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-row">
+      <div class="sidebar-logo-icon">🏢</div>
+      <div>
+        <div class="sidebar-logo-text">Investra HQ</div>
+        <div class="sidebar-logo-sub">Admin Panel</div>
+      </div>
+    </div>
+    <div class="sidebar-badge">🔐 ADMIN ACCESS</div>
+  </div>
+
+  <div class="nav-section">Main</div>
+  <div class="nav-item active" onclick="showSection('revenue')"><span class="nav-icon">💰</span>Revenue Model</div>
+  <div class="nav-item" onclick="showSection('packages')"><span class="nav-icon">📦</span>Packages & Pricing</div>
+  <div class="nav-item" onclick="showSection('credits')"><span class="nav-icon">🎟️</span>Credit System</div>
+  <div class="nav-item" onclick="showSection('services')"><span class="nav-icon">📢</span>Ad Services</div>
+  <div class="nav-item" onclick="showSection('countries')"><span class="nav-icon">🌍</span>Country Settings</div>
+  <div class="nav-item" onclick="showSection('mf_pricing')"><span class="nav-icon">🏆</span>MF Pricing</div>
+  <div class="nav-item" onclick="showSection('f_pricing')"><span class="nav-icon">🏪</span>Franchise Pricing</div>
+
+  <div class="nav-section">Tools</div>
+  <div class="nav-item" onclick="window.location='calculator.html'"><span class="nav-icon">📊</span>MF/F Calculator</div>
+  <div class="nav-item" onclick="window.location='partner.html'"><span class="nav-icon">🔗</span>Partner Link</div>
+  <div class="nav-item" onclick="window.location='model-preview.html'"><span class="nav-icon">👁️</span>Model Preview</div>
+
+  <div class="nav-section">System</div>
+  <div class="nav-item" onclick="exportSettings()"><span class="nav-icon">💾</span>Export Settings</div>
+  <div class="nav-item" onclick="resetDefaults()"><span class="nav-icon">🔄</span>Reset to Defaults</div>
+  <div class="nav-item" onclick="window.location='index.html'"><span class="nav-icon">🚪</span>Logout</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Admin <span>Settings</span></div>
+    <div class="topbar-actions">
+      <div class="saved-badge" id="savedBadge">✅ Settings Saved!</div>
+      <button class="btn btn-outline" onclick="resetDefaults()">↩ Reset</button>
+      <button class="btn btn-gold" onclick="saveSettings()">💾 Save All Settings</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- REVENUE MODEL SECTION -->
+    <div class="section" id="section-revenue">
+      <div class="section-title">💰 Revenue Model B — Tiered Royalty</div>
+      <div class="section-subtitle">All percentages are adjustable. Changes automatically update all calculators and projections.</div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'gmv')">GMV Royalty Tiers</button>
+        <button class="tab-btn" onclick="switchTab(this,'licence')">Licence Cascade</button>
+        <button class="tab-btn" onclick="switchTab(this,'ads_rev')">Ads & Events</button>
+        <button class="tab-btn" onclick="switchTab(this,'recruit')">Recruit Bonus</button>
+      </div>
+
+      <!-- GMV TIERS -->
+      <div class="tab-panel active" id="tab-gmv">
+        <table class="settings-table">
+          <thead><tr><th>GMV Tier</th><th>Investra HQ %</th><th>Master Franchise %</th><th>Standard Franchise %</th><th>Total %</th></tr></thead>
+          <tbody>
+            <tr><td>&lt; €1M</td>
+              <td><input type="number" id="gmv1_hq" value="2" min="0" max="10" step="0.1" oninput="calcGMVTotal(1)"> %</td>
+              <td><input type="number" id="gmv1_mf" value="1" min="0" max="10" step="0.1" oninput="calcGMVTotal(1)"> %</td>
+              <td><input type="number" id="gmv1_f" value="0.5" min="0" max="10" step="0.1" oninput="calcGMVTotal(1)"> %</td>
+              <td><b id="gmv1_total">3.5%</b></td></tr>
+            <tr><td>€1M – €5M</td>
+              <td><input type="number" id="gmv2_hq" value="2" min="0" max="10" step="0.1" oninput="calcGMVTotal(2)"> %</td>
+              <td><input type="number" id="gmv2_mf" value="1.5" min="0" max="10" step="0.1" oninput="calcGMVTotal(2)"> %</td>
+              <td><input type="number" id="gmv2_f" value="1" min="0" max="10" step="0.1" oninput="calcGMVTotal(2)"> %</td>
+              <td><b id="gmv2_total">4.5%</b></td></tr>
+            <tr><td>€5M – €20M</td>
+              <td><input type="number" id="gmv3_hq" value="2" min="0" max="10" step="0.1" oninput="calcGMVTotal(3)"> %</td>
+              <td><input type="number" id="gmv3_mf" value="2" min="0" max="10" step="0.1" oninput="calcGMVTotal(3)"> %</td>
+              <td><input type="number" id="gmv3_f" value="1.5" min="0" max="10" step="0.1" oninput="calcGMVTotal(3)"> %</td>
+              <td><b id="gmv3_total">5.5%</b></td></tr>
+            <tr><td>&gt; €20M</td>
+              <td><input type="number" id="gmv4_hq" value="2" min="0" max="10" step="0.1" oninput="calcGMVTotal(4)"> %</td>
+              <td><input type="number" id="gmv4_mf" value="2.5" min="0" max="10" step="0.1" oninput="calcGMVTotal(4)"> %</td>
+              <td><input type="number" id="gmv4_f" value="2" min="0" max="10" step="0.1" oninput="calcGMVTotal(4)"> %</td>
+              <td><b id="gmv4_total">6.5%</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- LICENCE CASCADE -->
+      <div class="tab-panel" id="tab-licence">
+        <p style="font-size:13px;color:var(--gray);margin-bottom:16px;">Cascade logic: who sold = who earns. Remaining % goes to Investra HQ.</p>
+        <table class="settings-table">
+          <thead><tr><th>Active Licences</th><th>MF %</th><th>F %</th><th>Referral %</th><th>HQ (auto)</th></tr></thead>
+          <tbody>
+            <tr><td>&lt; 50 licences</td>
+              <td><input type="number" id="lic1_mf" value="15" min="0" max="50" step="1" oninput="calcLicHQ(1)"> %</td>
+              <td><input type="number" id="lic1_f" value="8" min="0" max="50" step="1" oninput="calcLicHQ(1)"> %</td>
+              <td><input type="number" id="lic1_ref" value="5" min="0" max="20" step="1" oninput="calcLicHQ(1)"> %</td>
+              <td><b id="lic1_hq" style="color:var(--red)">72%</b></td></tr>
+            <tr><td>50 – 100 licences</td>
+              <td><input type="number" id="lic2_mf" value="18" min="0" max="50" step="1" oninput="calcLicHQ(2)"> %</td>
+              <td><input type="number" id="lic2_f" value="10" min="0" max="50" step="1" oninput="calcLicHQ(2)"> %</td>
+              <td><input type="number" id="lic2_ref" value="5" min="0" max="20" step="1" oninput="calcLicHQ(2)"> %</td>
+              <td><b id="lic2_hq" style="color:var(--red)">67%</b></td></tr>
+            <tr><td>&gt; 100 licences</td>
+              <td><input type="number" id="lic3_mf" value="20" min="0" max="50" step="1" oninput="calcLicHQ(3)"> %</td>
+              <td><input type="number" id="lic3_f" value="12" min="0" max="50" step="1" oninput="calcLicHQ(3)"> %</td>
+              <td><input type="number" id="lic3_ref" value="5" min="0" max="20" step="1" oninput="calcLicHQ(3)"> %</td>
+              <td><b id="lic3_hq" style="color:var(--red)">63%</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ADS & EVENTS -->
+      <div class="tab-panel" id="tab-ads_rev">
+        <table class="settings-table">
+          <thead><tr><th>Revenue Type</th><th>MF % (min)</th><th>MF % (max)</th><th>F % (min)</th><th>F % (max)</th><th>Referral %</th></tr></thead>
+          <tbody>
+            <tr><td>Advertising Credits</td>
+              <td><input type="number" id="ads_mf_min" value="15" min="0" max="50"> %</td>
+              <td><input type="number" id="ads_mf_max" value="20" min="0" max="50"> %</td>
+              <td><input type="number" id="ads_f_min" value="8" min="0" max="50"> %</td>
+              <td><input type="number" id="ads_f_max" value="12" min="0" max="50"> %</td>
+              <td><input type="number" id="ads_ref" value="3" min="0" max="20"> %</td></tr>
+            <tr><td>Event Tickets</td>
+              <td><input type="number" id="evt_mf_min" value="10" min="0" max="50"> %</td>
+              <td><input type="number" id="evt_mf_max" value="15" min="0" max="50"> %</td>
+              <td><input type="number" id="evt_f_min" value="5" min="0" max="50"> %</td>
+              <td><input type="number" id="evt_f_max" value="10" min="0" max="50"> %</td>
+              <td><input type="number" id="evt_ref" value="5" min="0" max="20"> %</td></tr>
+            <tr><td>Marketing / PR Content</td>
+              <td><input type="number" id="mkt_mf_min" value="10" min="0" max="50"> %</td>
+              <td><input type="number" id="mkt_mf_max" value="15" min="0" max="50"> %</td>
+              <td><input type="number" id="mkt_f_min" value="5" min="0" max="50"> %</td>
+              <td><input type="number" id="mkt_f_max" value="10" min="0" max="50"> %</td>
+              <td><input type="number" id="mkt_ref" value="3" min="0" max="20"> %</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- RECRUIT BONUS -->
+      <div class="tab-panel" id="tab-recruit">
+        <div class="grid-2">
+          <div class="field">
+            <label>MF Recruit Bonus (% of new MF/F first year licence)</label>
+            <div class="range-wrap">
+              <input type="range" id="recruit_mf" min="0" max="30" value="15" oninput="document.getElementById('recruit_mf_val').textContent=this.value+'%'">
+              <span class="range-val" id="recruit_mf_val">15%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>MF Recurring Bonus (% per year after first)</label>
+            <div class="range-wrap">
+              <input type="range" id="recruit_recurring" min="0" max="15" value="5" oninput="document.getElementById('recruit_rec_val').textContent=this.value+'%'">
+              <span class="range-val" id="recruit_rec_val">5%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PACKAGES SECTION -->
+    <div class="section" id="section-packages" style="display:none">
+      <div class="section-title">📦 Packages & Pricing</div>
+      <div class="section-subtitle">All package prices and features are adjustable. Changes auto-update all projections.</div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'pkg_user')">👤 User/Client</button>
+        <button class="tab-btn" onclick="switchTab(this,'pkg_agent')">🧑‍💼 Agent</button>
+        <button class="tab-btn" onclick="switchTab(this,'pkg_agency')">🏢 Agency</button>
+        <button class="tab-btn" onclick="switchTab(this,'pkg_dev')">🏗️ Developer</button>
+        <button class="tab-btn" onclick="switchTab(this,'pkg_aff')">🔗 Affiliate</button>
+      </div>
+
+      <div class="tab-panel active" id="tab-pkg_user">
+        <div class="grid-2">
+          <div class="pkg-card">
+            <div class="pkg-title">🆓 Free Plan</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" value="0" readonly style="background:#F3F4F6"></div>
+            <div class="pkg-field"><label>Features</label><input type="text" value="Browse, save listings" style="width:160px"></div>
+          </div>
+          <div class="pkg-card featured">
+            <div class="pkg-badge">VIP</div>
+            <div class="pkg-title">⭐ VIP Plan</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" id="user_vip" value="50" min="0" oninput="updateCalcs()"></div>
+            <div class="pkg-field"><label>Features</label><input type="text" value="Priority alerts, AI match, exclusive" style="width:160px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-pkg_agent">
+        <div class="grid-3">
+          <div class="pkg-card">
+            <div class="pkg-title">🥉 Agent — Starter (P1)</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" id="agent_p1" value="49" min="0" oninput="updateCalcs()"></div>
+            <div class="pkg-field"><label>Setup Fee (€)</label><input type="number" id="agent_p1_setup" value="0" min="0"></div>
+          </div>
+          <div class="pkg-card featured">
+            <div class="pkg-badge">POPULAR</div>
+            <div class="pkg-title">🥈 Agent — Pro (P2)</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" id="agent_p2" value="99" min="0" oninput="updateCalcs()"></div>
+            <div class="pkg-field"><label>Setup Fee (€)</label><input type="number" id="agent_p2_setup" value="0" min="0"></div>
+          </div>
+          <div class="pkg-card">
+            <div class="pkg-title">🥇 Agent — Elite (P3)</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" id="agent_p3" value="199" min="0" oninput="updateCalcs()"></div>
+            <div class="pkg-field"><label>Setup Fee (€)</label><input type="number" id="agent_p3_setup" value="0" min="0"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-pkg_agency">
+        <div class="grid-3">
+          <div class="pkg-card">
+            <div class="pkg-title">🥉 Agency — Team (P1)</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" id="agency_p1" value="199" min="0" oninput="updateCalcs()"></div>
+            <div class="pkg-field"><label>Setup Fee (€)</label><input type="number" id="agency_p1_setup" value="299" min="0"></div>
+          </div>
+          <div class="pkg-card featured">
+            <div class="pkg-badge">POPULAR</div>
+            <div class="pkg-title">🥈 Agency — Network (P2)</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" id="agency_p2" value="399" min="0" oninput="updateCalcs()"></div>
+            <div class="pkg-field"><label>Setup Fee (€)</label><input type="number" id="agency_p2_setup" value="499" min="0"></div>
+          </div>
+          <div class="pkg-card">
+            <div class="pkg-title">🥇 Agency — Enterprise (P3)</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" id="agency_p3" value="599" min="0" oninput="updateCalcs()"></div>
+            <div class="pkg-field"><label>Setup Fee (€)</label><input type="number" id="agency_p3_setup" value="999" min="0"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-pkg_dev">
+        <div class="grid-3">
+          <div class="pkg-card">
+            <div class="pkg-title">🥉 Developer — Starter (P1)</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" id="dev_p1" value="299" min="0" oninput="updateCalcs()"></div>
+            <div class="pkg-field"><label>Setup Fee (€)</label><input type="number" id="dev_p1_setup" value="499" min="0"></div>
+          </div>
+          <div class="pkg-card featured">
+            <div class="pkg-badge">POPULAR</div>
+            <div class="pkg-title">🥈 Developer — Pro (P2)</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" id="dev_p2" value="599" min="0" oninput="updateCalcs()"></div>
+            <div class="pkg-field"><label>Setup Fee (€)</label><input type="number" id="dev_p2_setup" value="999" min="0"></div>
+          </div>
+          <div class="pkg-card">
+            <div class="pkg-title">🥇 Developer — Enterprise (P3)</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" id="dev_p3" value="999" min="0" oninput="updateCalcs()"></div>
+            <div class="pkg-field"><label>Setup Fee (€)</label><input type="number" id="dev_p3_setup" value="1999" min="0"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-pkg_aff">
+        <div class="grid-3">
+          <div class="pkg-card">
+            <div class="pkg-title">🥉 Affiliate — Starter (P1)</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" id="aff_p1" value="0" min="0"></div>
+            <div class="pkg-field"><label>Commission %</label><input type="number" id="aff_p1_pct" value="5" min="0" max="30"> %</div>
+          </div>
+          <div class="pkg-card featured">
+            <div class="pkg-badge">POPULAR</div>
+            <div class="pkg-title">🥈 Affiliate — Pro (P2)</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" id="aff_p2" value="29" min="0"></div>
+            <div class="pkg-field"><label>Commission %</label><input type="number" id="aff_p2_pct" value="10" min="0" max="30"> %</div>
+          </div>
+          <div class="pkg-card">
+            <div class="pkg-title">🥇 Affiliate — Elite (P3)</div>
+            <div class="pkg-field"><label>Monthly Price (€)</label><input type="number" id="aff_p3" value="79" min="0"></div>
+            <div class="pkg-field"><label>Commission %</label><input type="number" id="aff_p3_pct" value="15" min="0" max="30"> %</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREDIT SYSTEM -->
+    <div class="section" id="section-credits" style="display:none">
+      <div class="section-title">🎟️ Credit System</div>
+      <div class="section-subtitle">2-tier credit system: Purchased Credits (1 year validity) and Promotional Credits (custom expiry).</div>
+
+      <div class="grid-3" style="margin-bottom:20px">
+        <div class="field">
+          <label>Credit Value (1 Credit = € ?)</label>
+          <input type="number" id="credit_value" value="0.10" min="0.01" step="0.01" oninput="updateCreditCalcs()">
+          <div class="calc-display" id="credit_val_display">1 Credit = €0.10</div>
+        </div>
+        <div class="field">
+          <label>Purchased Credits Validity (months)</label>
+          <input type="number" id="credit_validity" value="12" min="1" max="60">
+        </div>
+        <div class="field">
+          <label>Promo Credits Default Expiry (days)</label>
+          <input type="number" id="promo_expiry" value="30" min="1" max="365">
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Credit Packages</div>
+      <table class="settings-table" id="credit_packages_table">
+        <thead><tr><th>Package Name</th><th>Credits</th><th>Price (€)</th><th>Discount %</th><th>Bonus Credits</th><th>Value (€)</th><th></th></tr></thead>
+        <tbody id="credit_pkg_body">
+          <tr>
+            <td><input type="text" value="Starter" style="width:100px"></td>
+            <td><input type="number" id="cp1_credits" value="500" min="1" oninput="calcCreditPkg(1)" style="width:80px"></td>
+            <td><input type="number" id="cp1_price" value="45" min="0" step="0.01" oninput="calcCreditPkg(1)" style="width:80px"></td>
+            <td><input type="number" id="cp1_disc" value="10" min="0" max="90" oninput="calcCreditPkg(1)" style="width:60px"> %</td>
+            <td><span id="cp1_bonus" class="auto-calc">50 credits</span></td>
+            <td><span id="cp1_val" class="auto-calc">€50.00</span></td>
+            <td><button onclick="removeRow(this)" style="background:none;border:none;cursor:pointer;color:var(--red)">✕</button></td>
+          </tr>
+          <tr>
+            <td><input type="text" value="Pro" style="width:100px"></td>
+            <td><input type="number" id="cp2_credits" value="1500" min="1" oninput="calcCreditPkg(2)" style="width:80px"></td>
+            <td><input type="number" id="cp2_price" value="120" min="0" step="0.01" oninput="calcCreditPkg(2)" style="width:80px"></td>
+            <td><input type="number" id="cp2_disc" value="20" min="0" max="90" oninput="calcCreditPkg(2)" style="width:60px"> %</td>
+            <td><span id="cp2_bonus" class="auto-calc">300 credits</span></td>
+            <td><span id="cp2_val" class="auto-calc">€150.00</span></td>
+            <td><button onclick="removeRow(this)" style="background:none;border:none;cursor:pointer;color:var(--red)">✕</button></td>
+          </tr>
+          <tr>
+            <td><input type="text" value="Business" style="width:100px"></td>
+            <td><input type="number" id="cp3_credits" value="5000" min="1" oninput="calcCreditPkg(3)" style="width:80px"></td>
+            <td><input type="number" id="cp3_price" value="350" min="0" step="0.01" oninput="calcCreditPkg(3)" style="width:80px"></td>
+            <td><input type="number" id="cp3_disc" value="30" min="0" max="90" oninput="calcCreditPkg(3)" style="width:60px"> %</td>
+            <td><span id="cp3_bonus" class="auto-calc">1500 credits</span></td>
+            <td><span id="cp3_val" class="auto-calc">€500.00</span></td>
+            <td><button onclick="removeRow(this)" style="background:none;border:none;cursor:pointer;color:var(--red)">✕</button></td>
+          </tr>
+          <tr>
+            <td><input type="text" value="Enterprise" style="width:100px"></td>
+            <td><input type="number" id="cp4_credits" value="15000" min="1" oninput="calcCreditPkg(4)" style="width:80px"></td>
+            <td><input type="number" id="cp4_price" value="900" min="0" step="0.01" oninput="calcCreditPkg(4)" style="width:80px"></td>
+            <td><input type="number" id="cp4_disc" value="40" min="0" max="90" oninput="calcCreditPkg(4)" style="width:60px"> %</td>
+            <td><span id="cp4_bonus" class="auto-calc">6000 credits</span></td>
+            <td><span id="cp4_val" class="auto-calc">€1500.00</span></td>
+            <td><button onclick="removeRow(this)" style="background:none;border:none;cursor:pointer;color:var(--red)">✕</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="add-row-btn" onclick="addCreditPackage()">+ Add Credit Package</button>
+
+      <div class="custom-credit-calc">
+        <h4>🧮 Custom Amount Calculator (for purchases over €1,000)</h4>
+        <div class="grid-3">
+          <div class="field">
+            <label>Customer enters amount (€)</label>
+            <input type="number" id="custom_eur" value="1000" min="1" oninput="calcCustomCredit()">
+          </div>
+          <div class="field">
+            <label>Auto-applied discount</label>
+            <div class="calc-display" id="custom_disc_display" style="font-size:16px;margin-top:8px">30% discount</div>
+          </div>
+          <div class="field">
+            <label>Credits received</label>
+            <div class="calc-display" id="custom_credits_display" style="font-size:16px;margin-top:8px">14,286 credits</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--gray);margin-top:8px">
+          Discount tiers: €0–€99: 0% | €100–€499: 10% | €500–€999: 20% | €1,000–€4,999: 30% | €5,000+: 40%
+        </div>
+      </div>
+    </div>
+
+    <!-- AD SERVICES -->
+    <div class="section" id="section-services" style="display:none">
+      <div class="section-title">📢 Advertising Services — Multi-Country Pricing</div>
+      <div class="section-subtitle">Set global base price. Country prices auto-calculate using multipliers. You can override individual country prices.</div>
+
+      <div class="grid-2" style="margin-bottom:20px">
+        <div class="field">
+          <label>Credit Value (for display)</label>
+          <input type="number" id="svc_credit_val" value="0.10" min="0.01" step="0.01" oninput="updateServiceCredits()">
+        </div>
+        <div class="field">
+          <label>Billing Period</label>
+          <select><option>Monthly</option><option>Weekly</option><option>Annual</option></select>
+        </div>
+      </div>
+
+      <table class="settings-table" id="services_table">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Global (€)</th>
+            <th>Slovenia</th>
+            <th>Croatia</th>
+            <th>Serbia</th>
+            <th>BiH</th>
+            <th>TRNC</th>
+            <th>Turkey</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="services_body">
+          <tr>
+            <td><input type="text" value="Top Developer" style="width:130px"></td>
+            <td><input type="number" class="svc-global" value="599" min="0" oninput="autoCalcCountries(this)" style="width:70px"> <div class="euro-display" id="svc_cr_0"></div></td>
+            <td><input type="number" class="svc-country" data-mult="0.50" value="299" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.58" value="349" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.67" value="399" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.42" value="249" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.47" value="279" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.75" value="449" style="width:65px"></td>
+            <td><button onclick="removeRow(this)" style="background:none;border:none;cursor:pointer;color:var(--red)">✕</button></td>
+          </tr>
+          <tr>
+            <td><input type="text" value="Top Project" style="width:130px"></td>
+            <td><input type="number" class="svc-global" value="399" min="0" oninput="autoCalcCountries(this)" style="width:70px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.50" value="199" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.58" value="229" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.67" value="249" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.42" value="149" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.47" value="179" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.75" value="299" style="width:65px"></td>
+            <td><button onclick="removeRow(this)" style="background:none;border:none;cursor:pointer;color:var(--red)">✕</button></td>
+          </tr>
+          <tr>
+            <td><input type="text" value="Top Agency" style="width:130px"></td>
+            <td><input type="number" class="svc-global" value="499" min="0" oninput="autoCalcCountries(this)" style="width:70px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.50" value="249" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.58" value="279" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.67" value="299" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.42" value="199" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.47" value="229" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.75" value="379" style="width:65px"></td>
+            <td><button onclick="removeRow(this)" style="background:none;border:none;cursor:pointer;color:var(--red)">✕</button></td>
+          </tr>
+          <tr>
+            <td><input type="text" value="Top Agent" style="width:130px"></td>
+            <td><input type="number" class="svc-global" value="199" min="0" oninput="autoCalcCountries(this)" style="width:70px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.50" value="99" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.58" value="109" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.67" value="119" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.42" value="79" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.47" value="89" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.75" value="149" style="width:65px"></td>
+            <td><button onclick="removeRow(this)" style="background:none;border:none;cursor:pointer;color:var(--red)">✕</button></td>
+          </tr>
+          <tr>
+            <td><input type="text" value="Top Property" style="width:130px"></td>
+            <td><input type="number" class="svc-global" value="149" min="0" oninput="autoCalcCountries(this)" style="width:70px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.50" value="79" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.58" value="89" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.67" value="99" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.42" value="59" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.47" value="69" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.75" value="119" style="width:65px"></td>
+            <td><button onclick="removeRow(this)" style="background:none;border:none;cursor:pointer;color:var(--red)">✕</button></td>
+          </tr>
+          <tr>
+            <td><input type="text" value="Top Article" style="width:130px"></td>
+            <td><input type="number" class="svc-global" value="99" min="0" oninput="autoCalcCountries(this)" style="width:70px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.50" value="49" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.58" value="55" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.67" value="59" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.42" value="39" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.47" value="45" style="width:65px"></td>
+            <td><input type="number" class="svc-country" data-mult="0.75" value="79" style="width:65px"></td>
+            <td><button onclick="removeRow(this)" style="background:none;border:none;cursor:pointer;color:var(--red)">✕</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="add-row-btn" onclick="addServiceRow()">+ Add New Service</button>
+    </div>
+
+    <!-- COUNTRY SETTINGS -->
+    <div class="section" id="section-countries" style="display:none">
+      <div class="section-title">🌍 Country Settings & Multipliers</div>
+      <div class="section-subtitle">Set country multipliers. Changing a multiplier auto-updates all service prices for that country.</div>
+      <table class="settings-table">
+        <thead><tr><th>Country</th><th>Multiplier</th><th>Currency</th><th>VAT %</th><th>Max Franchises</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr class="country-row"><td>🌐 Global</td><td class="multiplier-cell"><input type="number" value="1.00" step="0.01" style="width:70px"> ×</td><td>EUR</td><td><input type="number" value="0" style="width:50px"> %</td><td><input type="number" value="—" style="width:60px" disabled></td><td><span style="color:var(--green)">Active</span></td></tr>
+          <tr class="country-row"><td>🇸🇮 Slovenia</td><td class="multiplier-cell"><input type="number" value="0.50" step="0.01" style="width:70px"> ×</td><td>EUR</td><td><input type="number" value="22" style="width:50px"> %</td><td><input type="number" value="5" style="width:60px"></td><td><span style="color:var(--green)">Active</span></td></tr>
+          <tr class="country-row"><td>🇭🇷 Croatia</td><td class="multiplier-cell"><input type="number" value="0.58" step="0.01" style="width:70px"> ×</td><td>EUR</td><td><input type="number" value="25" style="width:50px"> %</td><td><input type="number" value="8" style="width:60px"></td><td><span style="color:var(--green)">Active</span></td></tr>
+          <tr class="country-row"><td>🇷🇸 Serbia</td><td class="multiplier-cell"><input type="number" value="0.67" step="0.01" style="width:70px"> ×</td><td>EUR</td><td><input type="number" value="20" style="width:50px"> %</td><td><input type="number" value="12" style="width:60px"></td><td><span style="color:var(--green)">Active</span></td></tr>
+          <tr class="country-row"><td>🇧🇦 BiH</td><td class="multiplier-cell"><input type="number" value="0.42" step="0.01" style="width:70px"> ×</td><td>BAM/EUR</td><td><input type="number" value="17" style="width:50px"> %</td><td><input type="number" value="8" style="width:60px"></td><td><span style="color:var(--green)">Active</span></td></tr>
+          <tr class="country-row"><td>🇨🇾 TRNC</td><td class="multiplier-cell"><input type="number" value="0.47" step="0.01" style="width:70px"> ×</td><td>EUR</td><td><input type="number" value="5" style="width:50px"> %</td><td><input type="number" value="6" style="width:60px"></td><td><span style="color:var(--green)">Active</span></td></tr>
+          <tr class="country-row"><td>🇹🇷 Turkey</td><td class="multiplier-cell"><input type="number" value="0.75" step="0.01" style="width:70px"> ×</td><td>EUR</td><td><input type="number" value="20" style="width:50px"> %</td><td><input type="number" value="15" style="width:60px"></td><td><span style="color:var(--blue)">Phase 2</span></td></tr>
+          <tr class="country-row"><td>🇩🇪 Germany</td><td class="multiplier-cell"><input type="number" value="0.95" step="0.01" style="width:70px"> ×</td><td>EUR</td><td><input type="number" value="19" style="width:50px"> %</td><td><input type="number" value="20" style="width:60px"></td><td><span style="color:var(--blue)">Phase 2</span></td></tr>
+        </tbody>
+      </table>
+      <button class="add-row-btn" onclick="addCountryRow()">+ Add Country</button>
+    </div>
+
+    <!-- MF PRICING -->
+    <div class="section" id="section-mf_pricing" style="display:none">
+      <div class="section-title">🏆 Master Franchise Pricing (by Population)</div>
+      <div class="section-subtitle">Annual licence + monthly SaaS fee. All values adjustable.</div>
+      <table class="settings-table">
+        <thead><tr><th>Tier</th><th>Population</th><th>Annual Licence (€)</th><th>Monthly SaaS (€)</th><th>Annual Total (€)</th></tr></thead>
+        <tbody>
+          <tr><td>Micro</td><td>&lt; 1M</td><td><input type="number" id="mf_t1_annual" value="25000" oninput="calcMFTotal(1)"></td><td><input type="number" id="mf_t1_monthly" value="1500" oninput="calcMFTotal(1)"></td><td><b id="mf_t1_total">€43,000</b></td></tr>
+          <tr><td>Small</td><td>1M – 3M</td><td><input type="number" id="mf_t2_annual" value="50000" oninput="calcMFTotal(2)"></td><td><input type="number" id="mf_t2_monthly" value="2000" oninput="calcMFTotal(2)"></td><td><b id="mf_t2_total">€74,000</b></td></tr>
+          <tr><td>Medium-S</td><td>3M – 7M</td><td><input type="number" id="mf_t3_annual" value="75000" oninput="calcMFTotal(3)"></td><td><input type="number" id="mf_t3_monthly" value="2500" oninput="calcMFTotal(3)"></td><td><b id="mf_t3_total">€105,000</b></td></tr>
+          <tr><td>Medium-L</td><td>7M – 15M</td><td><input type="number" id="mf_t4_annual" value="120000" oninput="calcMFTotal(4)"></td><td><input type="number" id="mf_t4_monthly" value="2500" oninput="calcMFTotal(4)"></td><td><b id="mf_t4_total">€150,000</b></td></tr>
+          <tr><td>Large</td><td>15M – 40M</td><td><input type="number" id="mf_t5_annual" value="180000" oninput="calcMFTotal(5)"></td><td><input type="number" id="mf_t5_monthly" value="3500" oninput="calcMFTotal(5)"></td><td><b id="mf_t5_total">€222,000</b></td></tr>
+          <tr><td>Premium</td><td>40M – 80M</td><td><input type="number" id="mf_t6_annual" value="280000" oninput="calcMFTotal(6)"></td><td><input type="number" id="mf_t6_monthly" value="5000" oninput="calcMFTotal(6)"></td><td><b id="mf_t6_total">€340,000</b></td></tr>
+          <tr><td>Mega</td><td>&gt; 80M</td><td><input type="number" id="mf_t7_annual" value="400000" oninput="calcMFTotal(7)"></td><td><input type="number" id="mf_t7_monthly" value="5000" oninput="calcMFTotal(7)"></td><td><b id="mf_t7_total">€460,000</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- F PRICING -->
+    <div class="section" id="section-f_pricing" style="display:none">
+      <div class="section-title">🏪 Standard Franchise Pricing (by GDP/capita Tier)</div>
+      <div class="section-subtitle">Setup fee + monthly SaaS. All values adjustable.</div>
+      <table class="settings-table">
+        <thead><tr><th>Tier</th><th>GDP/capita</th><th>Examples</th><th>Setup Fee (€)</th><th>Monthly SaaS (€)</th><th>Annual Total (€)</th></tr></thead>
+        <tbody>
+          <tr><td>Tier A</td><td>&lt; €10k</td><td>BiH, Serbia</td><td><input type="number" id="f_t1_setup" value="2900" oninput="calcFTotal(1)"></td><td><input type="number" id="f_t1_monthly" value="249" oninput="calcFTotal(1)"></td><td><b id="f_t1_total">€5,788</b></td></tr>
+          <tr><td>Tier B</td><td>€10k–€20k</td><td>TRNC</td><td><input type="number" id="f_t2_setup" value="3900" oninput="calcFTotal(2)"></td><td><input type="number" id="f_t2_monthly" value="349" oninput="calcFTotal(2)"></td><td><b id="f_t2_total">€8,088</b></td></tr>
+          <tr><td>Tier C</td><td>€20k–€35k</td><td>Slovenia, Croatia</td><td><input type="number" id="f_t3_setup" value="4900" oninput="calcFTotal(3)"></td><td><input type="number" id="f_t3_monthly" value="449" oninput="calcFTotal(3)"></td><td><b id="f_t3_total">€10,288</b></td></tr>
+          <tr><td>Tier D</td><td>€35k–€60k</td><td>Germany, UK</td><td><input type="number" id="f_t4_setup" value="5900" oninput="calcFTotal(4)"></td><td><input type="number" id="f_t4_monthly" value="549" oninput="calcFTotal(4)"></td><td><b id="f_t4_total">€12,488</b></td></tr>
+          <tr><td>Tier E</td><td>&gt; €60k</td><td>Switzerland, Qatar</td><td><input type="number" id="f_t5_setup" value="7900" oninput="calcFTotal(5)"></td><td><input type="number" id="f_t5_monthly" value="699" oninput="calcFTotal(5)"></td><td><b id="f_t5_total">€16,288</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- end content -->
+
+  <div class="status-bar">
+    <span>Investra Business Model Calculator — Admin Panel</span>
+    <span>Model B (Tiered Royalty) Active | Last saved: <span id="lastSaved">Never</span></span>
+  </div>
+</div><!-- end main -->
+</div><!-- end app -->
+
+<script>
+// ---- NAVIGATION ----
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+  document.getElementById('section-' + id).style.display = 'block';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.target.closest('.nav-item').classList.add('active');
+}
+
+// ---- TABS ----
+function switchTab(btn, panelId) {
+  const parent = btn.closest('.section') || btn.closest('.tab-bar').parentElement;
+  parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  parent.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + panelId).classList.add('active');
+}
+
+// ---- CALCULATIONS ----
+function calcGMVTotal(tier) {
+  const hq = parseFloat(document.getElementById('gmv'+tier+'_hq').value)||0;
+  const mf = parseFloat(document.getElementById('gmv'+tier+'_mf').value)||0;
+  const f  = parseFloat(document.getElementById('gmv'+tier+'_f').value)||0;
+  document.getElementById('gmv'+tier+'_total').textContent = (hq+mf+f).toFixed(1) + '%';
+}
+function calcLicHQ(tier) {
+  const mf = parseFloat(document.getElementById('lic'+tier+'_mf').value)||0;
+  const f  = parseFloat(document.getElementById('lic'+tier+'_f').value)||0;
+  const ref= parseFloat(document.getElementById('lic'+tier+'_ref').value)||0;
+  document.getElementById('lic'+tier+'_hq').textContent = Math.max(0, 100-mf-f-ref).toFixed(0) + '%';
+}
+function calcMFTotal(tier) {
+  const annual  = parseFloat(document.getElementById('mf_t'+tier+'_annual').value)||0;
+  const monthly = parseFloat(document.getElementById('mf_t'+tier+'_monthly').value)||0;
+  document.getElementById('mf_t'+tier+'_total').textContent = '€' + (annual + monthly*12).toLocaleString();
+}
+function calcFTotal(tier) {
+  const setup   = parseFloat(document.getElementById('f_t'+tier+'_setup').value)||0;
+  const monthly = parseFloat(document.getElementById('f_t'+tier+'_monthly').value)||0;
+  document.getElementById('f_t'+tier+'_total').textContent = '€' + (setup + monthly*12).toLocaleString();
+}
+function calcCreditPkg(n) {
+  const credits = parseFloat(document.getElementById('cp'+n+'_credits').value)||0;
+  const price   = parseFloat(document.getElementById('cp'+n+'_price').value)||0;
+  const disc    = parseFloat(document.getElementById('cp'+n+'_disc').value)||0;
+  const creditVal = parseFloat(document.getElementById('credit_value').value)||0.10;
+  const bonus = Math.round(credits * disc / 100);
+  const value = (credits + bonus) * creditVal;
+  document.getElementById('cp'+n+'_bonus').textContent = bonus.toLocaleString() + ' credits';
+  document.getElementById('cp'+n+'_val').textContent = '€' + value.toFixed(2);
+}
+function updateCreditCalcs() {
+  const val = parseFloat(document.getElementById('credit_value').value)||0.10;
+  document.getElementById('credit_val_display').textContent = '1 Credit = €' + val.toFixed(2);
+  [1,2,3,4].forEach(n => calcCreditPkg(n));
+  calcCustomCredit();
+}
+function calcCustomCredit() {
+  const eur = parseFloat(document.getElementById('custom_eur').value)||0;
+  const creditVal = parseFloat(document.getElementById('credit_value').value)||0.10;
+  let disc = 0;
+  if (eur >= 5000) disc = 40;
+  else if (eur >= 1000) disc = 30;
+  else if (eur >= 500) disc = 20;
+  else if (eur >= 100) disc = 10;
+  const baseCredits = eur / creditVal;
+  const bonusCredits = baseCredits * disc / 100;
+  const total = Math.round(baseCredits + bonusCredits);
+  document.getElementById('custom_disc_display').textContent = disc + '% discount';
+  document.getElementById('custom_credits_display').textContent = total.toLocaleString() + ' credits';
+}
+function autoCalcCountries(globalInput) {
+  const row = globalInput.closest('tr');
+  const globalVal = parseFloat(globalInput.value)||0;
+  row.querySelectorAll('.svc-country').forEach(inp => {
+    const mult = parseFloat(inp.dataset.mult)||1;
+    inp.value = Math.round(globalVal * mult);
+  });
+}
+function updateServiceCredits() {}
+function updateCalcs() {}
+
+// ---- ADD/REMOVE ROWS ----
+let creditPkgCount = 4;
+function addCreditPackage() {
+  creditPkgCount++;
+  const n = creditPkgCount;
+  const tbody = document.getElementById('credit_pkg_body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><input type="text" value="Custom ${n}" style="width:100px"></td>
+    <td><input type="number" id="cp${n}_credits" value="2000" oninput="calcCreditPkg(${n})" style="width:80px"></td>
+    <td><input type="number" id="cp${n}_price" value="180" step="0.01" oninput="calcCreditPkg(${n})" style="width:80px"></td>
+    <td><input type="number" id="cp${n}_disc" value="15" max="90" oninput="calcCreditPkg(${n})" style="width:60px"> %</td>
+    <td><span id="cp${n}_bonus" class="auto-calc">300 credits</span></td>
+    <td><span id="cp${n}_val" class="auto-calc">€230.00</span></td>
+    <td><button onclick="removeRow(this)" style="background:none;border:none;cursor:pointer;color:var(--red)">✕</button></td>`;
+  tbody.appendChild(tr);
+}
+function addServiceRow() {
+  const tbody = document.getElementById('services_body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><input type="text" value="New Service" style="width:130px"></td>
+    <td><input type="number" class="svc-global" value="199" oninput="autoCalcCountries(this)" style="width:70px"></td>
+    <td><input type="number" class="svc-country" data-mult="0.50" value="99" style="width:65px"></td>
+    <td><input type="number" class="svc-country" data-mult="0.58" value="115" style="width:65px"></td>
+    <td><input type="number" class="svc-country" data-mult="0.67" value="133" style="width:65px"></td>
+    <td><input type="number" class="svc-country" data-mult="0.42" value="83" style="width:65px"></td>
+    <td><input type="number" class="svc-country" data-mult="0.47" value="93" style="width:65px"></td>
+    <td><input type="number" class="svc-country" data-mult="0.75" value="149" style="width:65px"></td>
+    <td><button onclick="removeRow(this)" style="background:none;border:none;cursor:pointer;color:var(--red)">✕</button></td>`;
+  tbody.appendChild(tr);
+}
+function addCountryRow() {
+  const tbody = document.querySelector('#section-countries .settings-table tbody');
+  const tr = document.createElement('tr');
+  tr.className = 'country-row';
+  tr.innerHTML = `<td><input type="text" value="🌐 New Country" style="width:130px"></td>
+    <td class="multiplier-cell"><input type="number" value="0.60" step="0.01" style="width:70px"> ×</td>
+    <td><input type="text" value="EUR" style="width:50px"></td>
+    <td><input type="number" value="20" style="width:50px"> %</td>
+    <td><input type="number" value="5" style="width:60px"></td>
+    <td><span style="color:var(--blue)">Phase 2</span></td>`;
+  tbody.appendChild(tr);
+}
+function removeRow(btn) { btn.closest('tr').remove(); }
+
+// ---- SAVE / RESET ----
+function saveSettings() {
+  const badge = document.getElementById('savedBadge');
+  badge.style.display = 'block';
+  document.getElementById('lastSaved').textContent = new Date().toLocaleTimeString();
+  setTimeout(() => badge.style.display = 'none', 3000);
+  // In real app: save to localStorage or backend
+  try {
+    const settings = collectSettings();
+    localStorage.setItem('investra_bm_settings', JSON.stringify(settings));
+  } catch(e) {}
+}
+function resetDefaults() {
+  if (confirm('Reset all settings to defaults? This cannot be undone.')) {
+    localStorage.removeItem('investra_bm_settings');
+    location.reload();
+  }
+}
+function exportSettings() {
+  const settings = collectSettings();
+  const blob = new Blob([JSON.stringify(settings, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'investra_bm_settings_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+function collectSettings() {
+  return { exportedAt: new Date().toISOString(), model: 'B', version: '1.0' };
+}
+
+// ---- INIT ----
+// Init all totals
+[1,2,3,4].forEach(calcGMVTotal);
+[1,2,3].forEach(calcLicHQ);
+[1,2,3,4,5,6,7].forEach(calcMFTotal);
+[1,2,3,4,5].forEach(calcFTotal);
+[1,2,3,4].forEach(calcCreditPkg);
+calcCustomCredit();
+</script>
+</body>
+</html>

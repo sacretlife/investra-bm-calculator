@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investra — Partner Financial Projection</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--navy:#0A1628;--navy2:#1a2f52;--gold:#C9A84C;--gold-light:#F0D080;--white:#fff;--gray-bg:#F5F6FA;--gray:#6B7280;--border:#E5E7EB;--green:#10B981;--blue:#3B82F6;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--navy);min-height:100vh;color:var(--white);}
+.hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);padding:48px 32px 32px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,0.15) 0%,transparent 70%);pointer-events:none;}
+.hero-logo{display:inline-flex;align-items:center;gap:12px;margin-bottom:24px;}
+.hero-logo-icon{width:48px;height:48px;background:var(--gold);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.hero-logo-text{font-size:20px;font-weight:800;color:var(--white);}
+.hero-logo-sub{font-size:12px;color:var(--gold);margin-top:2px;}
+.hero h1{font-size:36px;font-weight:900;line-height:1.1;margin-bottom:12px;}
+.hero h1 span{color:var(--gold);}
+.hero p{font-size:16px;color:rgba(255,255,255,0.7);max-width:600px;margin:0 auto 32px;}
+.hero-badges{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.badge{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:6px 16px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);}
+
+.main{max-width:1100px;margin:0 auto;padding:40px 24px;}
+
+/* ROLE SELECTOR */
+.role-section{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;margin-bottom:32px;}
+.section-title{font-size:18px;font-weight:800;margin-bottom:4px;}
+.section-sub{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:24px;}
+.role-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:600px){.role-cards{grid-template-columns:1fr;}}
+.role-card{border:2px solid rgba(255,255,255,0.1);border-radius:14px;padding:20px;cursor:pointer;transition:all 0.15s;background:rgba(255,255,255,0.03);}
+.role-card:hover{border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.05);}
+.role-card.selected{border-color:var(--gold);background:rgba(201,168,76,0.1);}
+.role-card-icon{font-size:32px;margin-bottom:8px;}
+.role-card-title{font-size:16px;font-weight:800;margin-bottom:4px;}
+.role-card-sub{font-size:12px;color:rgba(255,255,255,0.5);}
+.role-card-highlight{margin-top:8px;font-size:12px;color:var(--gold);font-weight:700;}
+
+/* PARAMS */
+.params-section{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;margin-bottom:32px;display:none;}
+.params-section.visible{display:block;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:700px){.grid-3,.grid-2{grid-template-columns:1fr;}}
+.field label{display:block;font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+.field select,.field input{width:100%;padding:11px 14px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--white);font-size:14px;font-weight:600;}
+.field select option{background:var(--navy);}
+.field select:focus,.field input:focus{outline:none;border-color:var(--gold);}
+.range-wrap{display:flex;align-items:center;gap:12px;}
+.range-wrap input[type=range]{flex:1;accent-color:var(--gold);}
+.range-val{font-weight:700;font-size:14px;min-width:52px;text-align:right;color:var(--gold);}
+.btn-calc{width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);font-size:16px;font-weight:800;border:none;border-radius:12px;cursor:pointer;margin-top:20px;transition:all 0.15s;box-shadow:0 4px 16px rgba(201,168,76,0.3);}
+.btn-calc:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,168,76,0.4);}
+
+/* RESULTS */
+.results-section{display:none;}
+.results-section.visible{display:block;}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+@media(max-width:700px){.kpi-grid{grid-template-columns:1fr;}}
+.kpi-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:20px;}
+.kpi-card.featured{border-color:var(--gold);background:rgba(201,168,76,0.08);}
+.kpi-label{font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+.kpi-value{font-size:30px;font-weight:900;color:var(--gold);}
+.kpi-sub{font-size:12px;color:rgba(255,255,255,0.5);margin-top:6px;}
+.chart-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px;margin-bottom:24px;}
+.chart-title{font-size:15px;font-weight:800;margin-bottom:4px;}
+.chart-sub{font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:16px;}
+.chart-wrap{height:280px;position:relative;}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}
+@media(max-width:700px){.charts-grid{grid-template-columns:1fr;}}
+
+/* CTA */
+.cta-section{background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05));border:1px solid rgba(201,168,76,0.3);border-radius:20px;padding:40px;text-align:center;margin-bottom:40px;}
+.cta-section h2{font-size:28px;font-weight:900;margin-bottom:8px;}
+.cta-section h2 span{color:var(--gold);}
+.cta-section p{color:rgba(255,255,255,0.6);margin-bottom:24px;}
+.cta-btn{display:inline-block;padding:16px 40px;background:var(--gold);color:var(--navy);font-size:16px;font-weight:800;border-radius:12px;text-decoration:none;transition:all 0.15s;}
+.cta-btn:hover{background:var(--gold-light);transform:translateY(-2px);}
+
+.footer{text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:12px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-logo">
+    <div class="hero-logo-icon">🏢</div>
+    <div>
+      <div class="hero-logo-text">Investra</div>
+      <div class="hero-logo-sub">Partner Financial Calculator</div>
+    </div>
+  </div>
+  <h1>Your <span>Revenue Potential</span><br>as an Investra Partner</h1>
+  <p>Calculate your projected monthly and annual earnings as a Master Franchise or Standard Franchise partner. Adjust the inputs to match your market.</p>
+  <div class="hero-badges">
+    <span class="badge">✅ 3.5 Years Proven in TRNC</span>
+    <span class="badge">🌍 Phase 1: 6 Countries</span>
+    <span class="badge">💰 Model B — Tiered Royalty</span>
+    <span class="badge">🔒 Exclusive Territory Rights</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1: ROLE -->
+  <div class="role-section">
+    <div class="section-title">Step 1 — Choose Your Partnership Type</div>
+    <div class="section-sub">Select the role you are interested in to see the relevant financial projection.</div>
+    <div class="role-cards">
+      <div class="role-card" id="card_mf" onclick="selectPartnerRole('mf')">
+        <div class="role-card-icon">🏆</div>
+        <div class="role-card-title">Master Franchise</div>
+        <div class="role-card-sub">Exclusive country-level rights. Sell sub-franchises, manage all partners in your country.</div>
+        <div class="role-card-highlight">→ Higher earning potential | Country exclusivity</div>
+      </div>
+      <div class="role-card" id="card_f" onclick="selectPartnerRole('f')">
+        <div class="role-card-icon">🏪</div>
+        <div class="role-card-title">Standard Franchise</div>
+        <div class="role-card-sub">City or regional rights. Build your local real estate network under the Investra brand.</div>
+        <div class="role-card-highlight">→ Lower entry cost | Local market focus</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: PARAMS -->
+  <div class="params-section" id="params_section">
+    <div class="section-title">Step 2 — Enter Your Market Parameters</div>
+    <div class="section-sub">All inputs are adjustable. The calculator uses Investra's Model B (Tiered Royalty) structure.</div>
+
+    <div class="grid-3">
+      <div class="field">
+        <label>Country / Market</label>
+        <select id="p_country" onchange="calcPartner()">
+          <option value="si">🇸🇮 Slovenia</option>
+          <option value="hr">🇭🇷 Croatia</option>
+          <option value="rs">🇷🇸 Serbia</option>
+          <option value="ba">🇧🇦 Bosnia & Herzegovina</option>
+          <option value="cy">🇨🇾 TRNC / Cyprus</option>
+          <option value="tr">🇹🇷 Turkey</option>
+          <option value="de">🇩🇪 Germany</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Avg. Property Value (€)</label>
+        <input type="number" id="p_propval" value="250000" min="10000" step="5000" oninput="calcPartner()">
+      </div>
+      <div class="field">
+        <label>Avg. Commission %</label>
+        <div class="range-wrap">
+          <input type="range" id="p_comm" min="0.5" max="10" step="0.1" value="2" oninput="document.getElementById('p_comm_val').textContent=this.value+'%';calcPartner()">
+          <span class="range-val" id="p_comm_val">2%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:16px">
+      <div class="field">
+        <label>Active Agents</label>
+        <input type="number" id="p_agents" value="50" min="0" oninput="calcPartner()">
+      </div>
+      <div class="field">
+        <label>Active Agencies</label>
+        <input type="number" id="p_agencies" value="10" min="0" oninput="calcPartner()">
+      </div>
+      <div class="field">
+        <label>Transactions / Month</label>
+        <input type="number" id="p_txns" value="8" min="0" oninput="calcPartner()">
+      </div>
+    </div>
+
+    <button class="btn-calc" onclick="showResults()">📊 Calculate My Revenue Projection →</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-section" id="results_section">
+    <div class="kpi-grid">
+      <div class="kpi-card featured">
+        <div class="kpi-label">Your Monthly Revenue</div>
+        <div class="kpi-value" id="r_monthly">€0</div>
+        <div class="kpi-sub">All revenue streams combined</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Your Annual Revenue</div>
+        <div class="kpi-value" id="r_annual">€0</div>
+        <div class="kpi-sub">Year 1 projection</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Break-Even Month</div>
+        <div class="kpi-value" id="r_breakeven">M6</div>
+        <div class="kpi-sub">Based on licence investment</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">📈 3-Year Revenue Projection</div>
+        <div class="chart-sub">Monthly revenue with 20% annual growth</div>
+        <div class="chart-wrap"><canvas id="p_chart_growth"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">🥧 Revenue by Stream</div>
+        <div class="chart-sub">Monthly breakdown</div>
+        <div class="chart-wrap"><canvas id="p_chart_pie"></canvas></div>
+      </div>
+    </div>
+
+    <div class="cta-section">
+      <h2>Ready to Become an <span>Investra Partner?</span></h2>
+      <p>Join the fastest-growing PropTech franchise network. Exclusive territory rights available now.</p>
+      <a href="https://investra.io/en/contact" class="cta-btn">📩 Apply for Partnership →</a>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">© 2026 Investra International Ltd · London, UK · <a href="index.html" style="color:rgba(255,255,255,0.3)">Partner Login</a></div>
+
+<script>
+let partnerRole = null;
+let pCharts = {};
+
+function selectPartnerRole(role) {
+  partnerRole = role;
+  document.getElementById('card_mf').classList.toggle('selected', role==='mf');
+  document.getElementById('card_f').classList.toggle('selected', role==='f');
+  document.getElementById('params_section').classList.add('visible');
+  calcPartner();
+}
+
+function calcPartner() {
+  if (!partnerRole) return;
+  const propVal = parseFloat(document.getElementById('p_propval').value)||250000;
+  const commPct = parseFloat(document.getElementById('p_comm').value)||2;
+  const agents  = parseInt(document.getElementById('p_agents').value)||0;
+  const agencies= parseInt(document.getElementById('p_agencies').value)||0;
+  const txns    = parseInt(document.getElementById('p_txns').value)||0;
+
+  const monthly_gmv = txns * propVal;
+  const annual_gmv  = monthly_gmv * 12;
+
+  const gmv_tiers = [
+    {max:1e6,   mf:1,   f:0.5},
+    {max:5e6,   mf:1.5, f:1  },
+    {max:20e6,  mf:2,   f:1.5},
+    {max:Infinity, mf:2.5, f:2}
+  ];
+  const tier = gmv_tiers.find(t=>annual_gmv<=t.max)||gmv_tiers[gmv_tiers.length-1];
+  const pct = partnerRole==='mf' ? tier.mf : tier.f;
+
+  const royalty = monthly_gmv * commPct/100 * pct/100;
+  const lic_gross = agents*99 + agencies*199;
+  const lic_share = lic_gross * (partnerRole==='mf' ? 0.15 : 0.08);
+  const ads_share = 2000 * (partnerRole==='mf' ? 0.15 : 0.08);
+
+  const monthly = royalty + lic_share + ads_share;
+  const annual  = monthly * 12;
+  const cost    = partnerRole==='mf' ? 50000+2000*12 : 4900+449*12;
+  const be      = monthly > 0 ? Math.ceil(cost/monthly) : 99;
+
+  document.getElementById('r_monthly').textContent   = '€'+Math.round(monthly).toLocaleString();
+  document.getElementById('r_annual').textContent    = '€'+Math.round(annual).toLocaleString();
+  document.getElementById('r_breakeven').textContent = be<=60?'M'+be:'60M+';
+
+  // Charts
+  const labels36 = Array.from({length:36},(_,i)=>{const d=new Date();d.setMonth(d.getMonth()+i);return d.toLocaleString('en',{month:'short',year:'2-digit'});});
+  const growthData = labels36.map((_,i)=>Math.round(monthly*Math.pow(1.2,Math.floor(i/12))));
+
+  if (pCharts.growth) pCharts.growth.destroy();
+  pCharts.growth = new Chart(document.getElementById('p_chart_growth'),{
+    type:'line',
+    data:{labels:labels36,datasets:[{label:'Monthly Revenue',data:growthData,borderColor:'#C9A84C',backgroundColor:'rgba(201,168,76,0.15)',fill:true,tension:0.4,pointRadius:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'€'+v.toLocaleString(),color:'rgba(255,255,255,0.5)'},grid:{color:'rgba(255,255,255,0.05)'}},x:{ticks:{color:'rgba(255,255,255,0.4)'},grid:{display:false}}}}
+  });
+
+  if (pCharts.pie) pCharts.pie.destroy();
+  pCharts.pie = new Chart(document.getElementById('p_chart_pie'),{
+    type:'doughnut',
+    data:{labels:['Transaction Royalties','SaaS Licences','Advertising'],datasets:[{data:[Math.round(royalty),Math.round(lic_share),Math.round(ads_share)],backgroundColor:['#C9A84C','#10B981','#3B82F6'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'rgba(255,255,255,0.7)',font:{size:12}}}}}
+  });
+}
+
+function showResults() {
+  calcPartner();
+  document.getElementById('results_section').classList.add('visible');
+  document.getElementById('results_section').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
